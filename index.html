@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi TKA - SMAN 2 Semarang</title>
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      packages: { '[+]': ['mhchem'] }
+    },
+    loader: { load: ['[tex]/mhchem'] },
+    svg: { fontCache: 'global' },
+    startup: { typeset: false }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root {
+    --school-primary: #1e40af;
+    --school-primary-light: #3b82f6;
+    --school-accent: #dc2626;
+    --school-gold: #facc15;
+    --school-dark: #0f172a;
+    --bg: #eef2f7;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #f59e0b;
+    --radius: 14px;
+    --shadow: 0 2px 8px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text);
+    line-height: 1.55; min-height: 100vh;
+  }
+  .topbar {
+    background: linear-gradient(135deg, var(--school-primary) 0%, var(--school-primary-light) 100%);
+    color: white; padding: .85rem 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; box-shadow: 0 2px 12px rgba(0,0,0,.15);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-left { display: flex; align-items: center; gap: .75rem; }
+  .topbar-logo {
+    width: 42px; height: 42px; border-radius: 8px;
+    background: white; padding: 3px; object-fit: contain;
+    box-shadow: 0 2px 6px rgba(0,0,0,.15);
+  }
+  .topbar-text h1 { font-size: 1rem; font-weight: 800; line-height: 1.15; }
+  .topbar-text p { font-size: .72rem; opacity: .85; letter-spacing: .05em; text-transform: uppercase; }
+  .topbar-right {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .8rem; background: rgba(255,255,255,.15);
+    padding: .4rem .75rem; border-radius: 999px;
+  }
+  .topbar-right .user-badge {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: var(--school-gold); color: var(--school-dark);
+    display: grid; place-items: center; font-weight: 800; font-size: .75rem;
+  }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .container { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+  .menu-card {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 2rem 1.75rem;
+    text-align: center; margin-top: .5rem;
+  }
+  .menu-icon {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--school-primary), var(--school-primary-light));
+    display: grid; place-items: center;
+    margin: 0 auto 1rem; color: white;
+    box-shadow: 0 8px 20px rgba(30,64,175,.3);
+  }
+  .menu-icon svg { width: 38px; height: 38px; }
+  .menu-title { font-size: 1.6rem; font-weight: 800; color: var(--school-dark); margin-bottom: .35rem; }
+  .menu-sub { color: var(--muted); font-size: .92rem; margin-bottom: 1.5rem; }
+  .form-group { text-align: left; margin-bottom: 1.1rem; }
+  .form-label {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .85rem; font-weight: 700;
+    color: var(--school-dark); margin-bottom: .45rem;
+  }
+  .form-label svg { width: 16px; height: 16px; color: var(--school-primary); }
+  .form-select, .form-input {
+    width: 100%; padding: .85rem 1rem;
+    border: 2px solid var(--border); border-radius: 10px;
+    font-size: .95rem; font-family: inherit; background: white;
+    color: var(--text);
+  }
+  .form-select { cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='3'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 1rem center;
+    padding-right: 2.5rem;
+  }
+  .form-select:focus, .form-input:focus { outline: none; border-color: var(--school-primary); }
+  .form-input::placeholder { color: #94a3b8; }
+
+  .paket-picker {
+    display: flex; flex-direction: column; gap: .65rem;
+    margin-top: .25rem;
+  }
+  .paket-option {
+    display: flex; align-items: flex-start; gap: .85rem;
+    padding: 1rem 1.15rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all .15s;
+    text-align: left;
+    font-family: inherit;
+    color: var(--text);
+    width: 100%;
+  }
+  .paket-option:hover {
+    border-color: var(--school-primary);
+    background: #eff6ff;
+    transform: translateY(-1px);
+  }
+  .paket-option.terpilih {
+    border-color: var(--school-primary);
+    background: #eff6ff;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+  }
+  .paket-option .paket-radio {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: .15rem;
+    display: grid; place-items: center;
+    background: white;
+  }
+  .paket-option.terpilih .paket-radio {
+    border-color: var(--school-primary);
+  }
+  .paket-option.terpilih .paket-radio::after {
+    content: '';
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--school-primary);
+  }
+  .paket-option .paket-info { flex: 1; }
+  .paket-option .paket-nama {
+    font-size: .95rem; font-weight: 800;
+    color: var(--school-dark);
+    margin-bottom: .15rem;
+  }
+  .paket-option .paket-desc {
+    font-size: .8rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .paket-option .paket-badge {
+    display: inline-block;
+    font-size: .65rem; font-weight: 800;
+    padding: .15rem .5rem; border-radius: 999px;
+    margin-left: .5rem;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+  }
+  .badge-stat { background: #dcfce7; color: #166534; }
+  .badge-random { background: #fef3c7; color: #92400e; }
+
+  .btn-block {
+    width: 100%; padding: .95rem 1.25rem;
+    border: none; border-radius: 10px;
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    font-family: inherit; display: inline-flex;
+    align-items: center; justify-content: center;
+    gap: .5rem; transition: all .15s;
+  }
+  .btn-primary-school {
+    background: var(--school-primary); color: white;
+    box-shadow: 0 4px 14px rgba(30,64,175,.3);
+  }
+  .btn-primary-school:hover { background: var(--school-dark); transform: translateY(-1px); }
+  .copyright {
+    text-align: center; font-size: .75rem;
+    color: var(--muted); margin-top: 1.5rem; padding-bottom: 1rem;
+  }
+
+  .konfirmasi-card {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 2rem 1.75rem; margin-top: .5rem;
+  }
+  .konfirmasi-title { font-size: 1.5rem; font-weight: 800; color: var(--school-dark); margin-bottom: 1.25rem; }
+  .konfirmasi-row {
+    padding: .85rem 0; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 1rem;
+  }
+  .konfirmasi-row:last-of-type { border-bottom: none; margin-bottom: 1.25rem; }
+  .konfirmasi-row .lbl { font-size: .85rem; font-weight: 700; color: var(--school-dark); }
+  .konfirmasi-row .val { font-size: .95rem; text-align: right; }
+
+  .quiz-header {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 1rem 1.25rem;
+    margin-bottom: 1rem; display: flex; flex-wrap: wrap;
+    align-items: center; gap: .75rem; justify-content: space-between;
+  }
+  .quiz-header-left { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+  .quiz-nomor { font-size: 1rem; font-weight: 800; color: var(--school-dark); }
+  .chip {
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-size: .75rem; font-weight: 700;
+    padding: .3rem .7rem; border-radius: 999px;
+  }
+  .chip-blue { background: #dbeafe; color: #1e40af; }
+  .chip-green { background: #dcfce7; color: #166534; }
+  .chip-orange { background: #fef3c7; color: #92400e; }
+  .chip-purple { background: #e9d5ff; color: #6b21a8; }
+  .timer-box {
+    display: flex; align-items: center; gap: .4rem;
+    font-weight: 800; font-size: .9rem;
+    color: var(--school-primary); background: #eff6ff;
+    padding: .45rem .85rem; border-radius: 10px;
+    border: 1px solid #bfdbfe;
+  }
+  .timer-box.warning { color: var(--danger); background: #fef2f2; border-color: #fecaca; }
+
+  .quiz-body {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 1.5rem 1.5rem 1.75rem;
+  }
+  .quiz-badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1rem; }
+  .badge {
+    font-size: .68rem; padding: .25rem .6rem;
+    border-radius: 999px; font-weight: 700;
+    letter-spacing: .03em; text-transform: uppercase;
+  }
+  .badge-elemen { background: #dbeafe; color: #1e40af; }
+  .badge-knowing { background: #dcfce7; color: #166534; }
+  .badge-applying { background: #fef3c7; color: #92400e; }
+  .badge-reasoning { background: #fce7f3; color: #9d174d; }
+  .badge-tipe { background: #f1f5f9; color: #475569; }
+  .badge-asli { background: #fee2e2; color: #991b1b; }
+  .badge-baru { background: #e9d5ff; color: #6b21a8; }
+  .badge-konteks { background: #cffafe; color: #155e75; }
+
+  .stimulus {
+    background: #f8fafc; border-left: 4px solid var(--school-primary);
+    padding: 1rem 1.15rem; border-radius: 8px;
+    margin-bottom: 1.25rem; font-size: .95rem;
+  }
+  .stimulus p { margin-bottom: .5rem; }
+  .stimulus p:last-child { margin-bottom: 0; }
+
+  .table-wrapper {
+    overflow-x: auto; margin: .9rem 0;
+    border-radius: 8px; border: 1px solid var(--border);
+  }
+  table {
+    border-collapse: collapse; width: 100%;
+    min-width: 340px; font-size: .9rem; background: white;
+  }
+  th, td { padding: .55rem .8rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th {
+    background: #f1f5f9; font-weight: 700;
+    color: var(--school-primary); font-size: .8rem;
+    text-transform: uppercase; letter-spacing: .03em;
+  }
+  tr:last-child td { border-bottom: none; }
+
+  .pertanyaan { font-size: 1.02rem; font-weight: 600; margin-bottom: 1.1rem; }
+  .opsi-list { display: flex; flex-direction: column; gap: .55rem; }
+  .opsi {
+    display: flex; align-items: flex-start; gap: .75rem;
+    padding: .8rem 1rem; border: 2px solid var(--border);
+    border-radius: 10px; background: white; cursor: pointer;
+    transition: all .15s; text-align: left;
+    font-size: .95rem; font-family: inherit;
+    color: var(--text); width: 100%; line-height: 1.5;
+  }
+  .opsi:hover {
+    border-color: var(--school-primary); background: #eff6ff;
+  }
+  .opsi.terpilih {
+    border-color: var(--school-primary);
+    background: #eff6ff;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+  }
+  .opsi.terpilih .label { color: var(--school-primary); }
+  .opsi .label { font-weight: 800; color: var(--muted); min-width: 1.4rem; flex-shrink: 0; }
+  .opsi .teks { flex: 1; }
+  .opsi .mark { font-weight: 800; font-size: 1.1rem; flex-shrink: 0; color: var(--school-primary); }
+
+  .quiz-footer {
+    display: flex; gap: .6rem; margin-top: 1.25rem; flex-wrap: wrap;
+  }
+  .quiz-footer .btn {
+    flex: 1; min-width: 120px; padding: .85rem 1rem;
+    border: none; border-radius: 10px;
+    font-size: .92rem; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center;
+    justify-content: center; gap: .4rem;
+    transition: all .15s;
+  }
+  .btn-prev { background: #fee2e2; color: #991b1b; }
+  .btn-prev:hover:not(:disabled) { background: #fecaca; }
+  .btn-ragu { background: var(--school-gold); color: #78350f; }
+  .btn-ragu:hover { background: #eab308; }
+  .btn-review { background: #e0e7ff; color: #3730a3; }
+  .btn-review:hover { background: #c7d2fe; }
+  .btn-next { background: var(--school-primary); color: white; }
+  .btn-next:hover:not(:disabled) { background: var(--school-dark); }
+  .btn-selesai {
+    flex-basis: 100% !important;
+    background: var(--success) !important;
+    color: white !important;
+    font-size: .95rem !important;
+    padding: .9rem 1rem !important;
+    margin-top: .25rem;
+  }
+  .btn-selesai:hover { background: #15803d !important; }
+  .quiz-footer .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  .hasil-card {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 2rem 1.5rem;
+    text-align: center; margin-top: .5rem;
+  }
+  .hasil-card .skor-label {
+    color: var(--muted); font-size: .85rem;
+    text-transform: uppercase; letter-spacing: .12em; font-weight: 700;
+  }
+  .hasil-card .skor-besar {
+    font-size: 4rem; font-weight: 800;
+    color: var(--school-primary); line-height: 1; margin: .75rem 0;
+  }
+  .hasil-detail {
+    display: flex; justify-content: center;
+    gap: 1.5rem; margin: 1.25rem 0 1.75rem; flex-wrap: wrap;
+  }
+  .hasil-stat {
+    background: #f8fafc; padding: .75rem 1.25rem;
+    border-radius: 10px; border: 1px solid var(--border);
+    min-width: 100px;
+  }
+  .hasil-stat .num { font-size: 1.5rem; font-weight: 800; color: var(--school-primary); }
+  .hasil-stat .lbl { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .hasil-stat.benar .num { color: var(--success); }
+  .hasil-stat.salah .num { color: var(--danger); }
+  .hasil-actions { display: flex; gap: .75rem; flex-wrap: wrap; justify-content: center; }
+  .hasil-actions .btn-block { flex: 1; min-width: 200px; max-width: 260px; }
+  .btn-outline {
+    background: white; color: var(--school-primary);
+    border: 2px solid var(--school-primary);
+  }
+  .btn-outline:hover { background: #eff6ff; }
+
+  .pembahasan-page-header {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem; display: flex;
+    align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap;
+  }
+  .pembahasan-page-header h2 { font-size: 1.25rem; font-weight: 800; color: var(--school-dark); }
+  .pembahasan-page-header p { font-size: .85rem; color: var(--muted); }
+
+  .pembahasan-item {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 6px solid var(--school-primary);
+  }
+  .pembahasan-item.benar { border-left-color: var(--success); }
+  .pembahasan-item.salah { border-left-color: var(--danger); }
+  .pembahasan-item-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem;
+  }
+  .pembahasan-nomor {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-size: 1rem; font-weight: 800; color: var(--school-dark);
+  }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-size: .78rem; font-weight: 800;
+    padding: .3rem .8rem; border-radius: 999px;
+  }
+  .status-pill.benar { background: #dcfce7; color: #166534; }
+  .status-pill.salah { background: #fee2e2; color: #991b1b; }
+  .pembahasan-pertanyaan {
+    font-size: .95rem; font-weight: 600;
+    margin-bottom: 1rem; padding-bottom: .75rem;
+    border-bottom: 1px dashed var(--border);
+  }
+  .pembahasan-opsi-rekap {
+    display: flex; flex-direction: column; gap: .35rem;
+    margin-bottom: 1rem; font-size: .88rem;
+  }
+  .pembahasan-opsi-rekap .row {
+    display: flex; align-items: flex-start; gap: .5rem;
+    padding: .4rem .6rem; border-radius: 6px;
+    background: #f8fafc;
+  }
+  .pembahasan-opsi-rekap .row.jawaban-user { background: #fef2f2; }
+  .pembahasan-opsi-rekap .row.kunci { background: #f0fdf4; }
+  .pembahasan-opsi-rekap .row.benar-dan-user { background: #f0fdf4; }
+  .pembahasan-opsi-rekap .lbl { font-weight: 800; min-width: 1.4rem; }
+  .pembahasan-opsi-rekap .tag {
+    font-size: .7rem; font-weight: 800;
+    padding: .1rem .4rem; border-radius: 4px;
+    background: var(--school-primary); color: white;
+    text-transform: uppercase; letter-spacing: .03em;
+  }
+  .pembahasan-opsi-rekap .tag.kunci { background: var(--success); }
+  .pembahasan-opsi-rekap .tag.user { background: var(--danger); }
+  .pembahasan-body h4 {
+    font-size: .78rem; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--school-primary);
+    margin: 1rem 0 .4rem; padding-bottom: .25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .pembahasan-body h4:first-child { margin-top: 0; }
+  .pembahasan-body p, .pembahasan-body li { font-size: .93rem; }
+  .pembahasan-body ol { padding-left: 1.4rem; margin: .35rem 0; }
+  .pembahasan-body li { margin-bottom: .35rem; }
+  .jawaban-box {
+    display: inline-block; background: #f0fdf4;
+    border: 2px solid var(--success); color: var(--success);
+    font-weight: 800; padding: .45rem 1.1rem;
+    border-radius: 8px; margin-top: .6rem; font-size: .95rem;
+  }
+
+  .drawer-overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,.5);
+    z-index: 90; opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed; top: 0; right: -360px;
+    width: 340px; max-width: 90vw; height: 100vh;
+    background: white; z-index: 100;
+    box-shadow: -8px 0 32px rgba(0,0,0,.15);
+    transition: right .25s ease;
+    display: flex; flex-direction: column;
+  }
+  .drawer.open { right: 0; }
+  .drawer-header {
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, var(--school-primary), var(--school-primary-light));
+    color: white; display: flex;
+    align-items: center; justify-content: space-between;
+  }
+  .drawer-header h3 { font-size: 1rem; font-weight: 800; }
+  .drawer-close {
+    background: rgba(255,255,255,.2); border: none;
+    color: white; width: 30px; height: 30px;
+    border-radius: 8px; cursor: pointer;
+    font-size: 1.1rem; display: grid; place-items: center;
+  }
+  .drawer-body { padding: 1rem; overflow-y: auto; flex: 1; }
+  .soal-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem;
+  }
+  .soal-cell {
+    aspect-ratio: 1; border-radius: 8px;
+    border: 2px solid var(--border); background: white;
+    font-weight: 700; font-size: .85rem;
+    cursor: pointer; display: grid; place-items: center;
+    transition: all .15s; font-family: inherit; color: var(--text);
+  }
+  .soal-cell:hover { border-color: var(--school-primary); }
+  .soal-cell.current {
+    background: var(--school-primary); color: white;
+    border-color: var(--school-primary);
+  }
+  .soal-cell.terjawab { background: #dcfce7; border-color: var(--success); color: #166534; }
+  .soal-cell.ragu { background: var(--school-gold); border-color: #eab308; color: #78350f; }
+  .drawer-legend {
+    display: flex; flex-direction: column; gap: .5rem;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 1px solid var(--border); font-size: .82rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: .5rem; }
+  .legend-dot {
+    width: 16px; height: 16px; border-radius: 4px;
+    border: 2px solid var(--border);
+  }
+  .legend-dot.terjawab { background: #dcfce7; border-color: var(--success); }
+  .legend-dot.ragu { background: var(--school-gold); border-color: #eab308; }
+  .legend-dot.current { background: var(--school-primary); border-color: var(--school-primary); }
+
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,23,42,.6);
+    z-index: 200;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: white;
+    border-radius: var(--radius);
+    width: 100%; max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    animation: modalIn .25s ease;
+  }
+  @keyframes modalIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .modal-header {
+    padding: 1.1rem 1.4rem;
+    background: linear-gradient(135deg, var(--school-primary), var(--school-primary-light));
+    color: white;
+    display: flex; align-items: center; justify-content: space-between;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .modal-header h3 { font-size: 1.05rem; font-weight: 800; }
+  .modal-close {
+    background: rgba(255,255,255,.2); border: none; color: white;
+    width: 30px; height: 30px; border-radius: 8px;
+    cursor: pointer; font-size: 1rem;
+    display: grid; place-items: center;
+  }
+  .modal-body { padding: 1.25rem 1.4rem; }
+  .modal-footer {
+    padding: 1rem 1.4rem;
+    border-top: 1px solid var(--border);
+    display: flex; gap: .6rem; flex-wrap: wrap;
+  }
+  .modal-footer .btn-modal {
+    flex: 1; min-width: 140px;
+    padding: .8rem 1rem;
+    border: none; border-radius: 10px;
+    font-weight: 700; font-family: inherit;
+    cursor: pointer; font-size: .92rem;
+  }
+  .btn-modal-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
+  .btn-modal-secondary:hover { background: #e2e8f0; }
+  .btn-modal-primary { background: var(--school-primary); color: white; }
+  .btn-modal-primary:hover { background: var(--school-dark); }
+
+  .review-stat-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: .5rem; margin-bottom: 1rem;
+  }
+  .review-stat {
+    background: #f8fafc; border-radius: 10px;
+    padding: .75rem .5rem; text-align: center;
+    border: 1px solid var(--border);
+  }
+  .review-stat .num { font-size: 1.4rem; font-weight: 800; }
+  .review-stat .lbl { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .review-stat.terjawab .num { color: var(--success); }
+  .review-stat.belum .num { color: var(--danger); }
+  .review-stat.ragu .num { color: var(--warning); }
+
+  .review-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: .4rem;
+    margin-top: .5rem;
+  }
+  .review-cell {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    font-weight: 700; font-size: .8rem;
+    display: grid; place-items: center;
+    background: white;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+  }
+  .review-cell.belum { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+  .review-cell.ragu { background: var(--school-gold); border-color: #eab308; color: #78350f; }
+  .review-cell.terjawab { background: #dcfce7; border-color: #86efac; color: #166534; }
+
+  @media (max-width: 600px) {
+    .menu-title { font-size: 1.35rem; }
+    .hasil-card .skor-besar { font-size: 3rem; }
+    .topbar-text h1 { font-size: .9rem; }
+    .review-grid { grid-template-columns: repeat(5, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%231e40af'/><path d='M50 15 L60 35 L82 38 L66 54 L70 76 L50 65 L30 76 L34 54 L18 38 L40 35 Z' fill='%23facc15'/><circle cx='50' cy='50' r='12' fill='%23dc2626'/></svg>"
+         alt="Logo Sekolah" class="topbar-logo">
+    <div class="topbar-text">
+      <h1>SMAN 2 SEMARANG</h1>
+      <p>Simulasi TKA - Kimia</p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-badge" id="userBadge">?</div>
+    <span id="userNameTopbar">Guest</span>
+  </div>
+</div>
+
+<!-- SCREEN 1: MENU -->
+<div class="screen active" id="screen-menu">
+  <div class="container">
+    <div class="menu-card">
+      <div class="menu-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10L12 5 2 10l10 5 10-5z"/>
+          <path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/>
+        </svg>
+      </div>
+      <div class="menu-title">Simulasi TKA</div>
+      <div class="menu-sub">Pilih paket, isi data, dan mulai simulasi</div>
+
+      <div class="form-group">
+        <label class="form-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Nama Lengkap:
+        </label>
+        <input type="text" class="form-input" id="inputNama" placeholder="Contoh: Ahmad Rizki Pratama" maxlength="50" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          Kelas:
+        </label>
+        <input type="text" class="form-input" id="inputKelas" placeholder="Contoh: XII MIPA 3" maxlength="20" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          Pilih Paket Simulasi:
+        </label>
+        <div class="paket-picker" id="paketPicker">
+          <button type="button" class="paket-option terpilih" data-paket="1">
+            <div class="paket-radio"></div>
+            <div class="paket-info">
+              <div class="paket-nama">Paket 1 — Latihan Terstruktur
+                <span class="paket-badge badge-stat">Statis</span>
+              </div>
+              <div class="paket-desc">30 soal • 60 menit • urutan tetap — cocok untuk belajar terstruktur</div>
+            </div>
+          </button>
+          <button type="button" class="paket-option" data-paket="2">
+            <div class="paket-radio"></div>
+            <div class="paket-info">
+              <div class="paket-nama">Paket 2 — Simulasi A
+                <span class="paket-badge badge-random">Diacak</span>
+              </div>
+              <div class="paket-desc">25 soal • 60 menit • soal & opsi diacak — fenomena sehari-hari & penyelidikan ilmiah</div>
+            </div>
+          </button>
+          <button class="paket-option" data-paket="3" type="button">
+            <div class="paket-radio"></div>
+            <div class="paket-info">
+              <div class="paket-nama">Paket 3 — Simulasi B
+                <span class="paket-badge badge-random">Diacak</span>
+              </div>
+              <div class="paket-desc">25 soal • 60 menit • soal & opsi diacak — lingkungan & industri</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Mata Pelajaran:
+        </label>
+        <select class="form-select" id="selectMapel">
+          <option>Kimia</option>
+          <option>Matematika</option>
+          <option>Fisika</option>
+          <option>Biologi</option>
+        </select>
+      </div>
+
+      <button class="btn-block btn-primary-school" id="btnMulaiSimulasi">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Mulai Simulasi
+      </button>
+    </div>
+    <div class="copyright">Copyright © 2026 MGMP Kimia SMA Negeri 2 Semarang. All rights reserved.</div>
+  </div>
+</div>
+
+<!-- SCREEN 2: KONFIRMASI -->
+<div class="screen" id="screen-konfirmasi">
+  <div class="container">
+    <div class="konfirmasi-card">
+      <h2 class="konfirmasi-title">Konfirmasi Tes</h2>
+      <div class="konfirmasi-row"><div class="lbl">Nama Peserta</div><div class="val" id="konfNama">-</div></div>
+      <div class="konfirmasi-row"><div class="lbl">Kelas</div><div class="val" id="konfKelas">-</div></div>
+      <div class="konfirmasi-row"><div class="lbl">Nama Tes</div><div class="val" id="konfNamaTes">Kimia</div></div>
+      <div class="konfirmasi-row"><div class="lbl">Paket</div><div class="val" id="konfPaket">-</div></div>
+      <div class="konfirmasi-row"><div class="lbl">Jumlah Soal</div><div class="val" id="konfJumlahSoal">-</div></div>
+      <div class="konfirmasi-row"><div class="lbl">Alokasi Waktu</div><div class="val" id="konfAlokasi">60 Menit</div></div>
+      <button class="btn-block btn-primary-school" id="btnMulaiTes">Mulai</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: QUIZ -->
+<div class="screen" id="screen-quiz">
+  <div class="container">
+    <div class="quiz-header">
+      <div class="quiz-header-left">
+        <span class="quiz-nomor">Soal nomor <span id="quizNomor">1</span></span>
+        <span class="chip chip-blue" id="chipTipe">Pilihan Ganda</span>
+        <span class="chip chip-purple" id="chipPaket">Paket 1</span>
+      </div>
+      <div class="quiz-header-left">
+        <button class="chip chip-green" id="btnInfoSoal" type="button" style="border:none; cursor:pointer;">ℹ️ Informasi Soal</button>
+        <div class="timer-box" id="timerBox">⏱ <span id="timerText">60:00</span></div>
+        <button class="chip chip-orange" id="btnDaftarSoal" type="button" style="border:none; cursor:pointer;">📋 Daftar Soal</button>
+      </div>
+    </div>
+    <div class="quiz-body" id="quizBody"></div>
+    <div class="quiz-footer">
+      <button class="btn btn-prev" id="btnPrev" type="button">← Sebelumnya</button>
+      <button class="btn btn-ragu" id="btnRagu" type="button">🟡 Ragu-ragu</button>
+      <button class="btn btn-review" id="btnReview" type="button">📋 Review</button>
+      <button class="btn btn-next" id="btnNext" type="button">Berikutnya →</button>
+      <button class="btn btn-selesai" id="btnSelesai" type="button">✅ Selesai & Lihat Hasil</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: HASIL -->
+<div class="screen" id="screen-hasil">
+  <div class="container">
+    <div class="hasil-card">
+      <div class="skor-label">Skor Akhir</div>
+      <div class="skor-besar" id="skorAkhir">0</div>
+      <p style="color:var(--muted);">dari 100</p>
+
+      <div style="background:#f8fafc; border-radius:10px; padding:1rem 1.25rem; margin:1rem 0; text-align:left; font-size:.9rem;">
+        <div style="display:flex; justify-content:space-between; padding:.4rem 0; border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;">👤 Nama</span><span id="hasilNama">-</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:.4rem 0; border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;">🏫 Kelas</span><span id="hasilKelas">-</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:.4rem 0; border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;">📚 Paket</span><span id="hasilPaket">-</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:.4rem 0; border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;">🕐 Mulai</span><span id="hasilMulai">-</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:.4rem 0; border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;">🕐 Selesai</span><span id="hasilSelesai">-</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:.4rem 0; border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;">⏱ Durasi Pengerjaan</span>
+          <span id="hasilDurasi" style="color:var(--school-primary); font-weight:700;">-</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:.4rem 0;">
+          <span style="font-weight:700;">⏳ Sisa Waktu</span>
+          <span id="hasilSisa" style="color:var(--success); font-weight:700;">-</span>
+        </div>
+      </div>
+
+      <div class="hasil-detail">
+        <div class="hasil-stat benar"><div class="num" id="statBenar">0</div><div class="lbl">Benar</div></div>
+        <div class="hasil-stat salah"><div class="num" id="statSalah">0</div><div class="lbl">Salah</div></div>
+        <div class="hasil-stat"><div class="num" id="statTotal">0</div><div class="lbl">Total</div></div>
+      </div>
+
+      <div class="hasil-actions">
+        <button class="btn-block btn-outline" id="btnUlang">🔄 Ulangi Simulasi</button>
+        <button class="btn-block btn-primary-school" id="btnLihatPembahasan">📖 Lihat Pembahasan Lengkap</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 5: PEMBAHASAN -->
+<div class="screen" id="screen-pembahasan">
+  <div class="container">
+    <div class="pembahasan-page-header">
+      <div>
+        <h2>📖 Pembahasan Lengkap</h2>
+        <p id="pembahasanSubtitle">Semua soal dan pembahasan</p>
+      </div>
+      <button class="chip chip-blue" id="btnKembaliHasil" type="button" style="border:none; cursor:pointer;">← Kembali ke Hasil</button>
+    </div>
+    <div id="pembahasanList"></div>
+  </div>
+</div>
+
+<!-- MODAL REVIEW -->
+<div class="modal-overlay" id="modalReview">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📋 Review Jawaban</h3>
+      <button class="modal-close" id="btnTutupReview">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="review-stat-grid">
+        <div class="review-stat terjawab">
+          <div class="num" id="rvTerjawab">0</div>
+          <div class="lbl">Terjawab</div>
+        </div>
+        <div class="review-stat belum">
+          <div class="num" id="rvBelum">0</div>
+          <div class="lbl">Belum</div>
+        </div>
+        <div class="review-stat ragu">
+          <div class="num" id="rvRagu">0</div>
+          <div class="lbl">Ragu-ragu</div>
+        </div>
+      </div>
+      <p style="font-size:.85rem; color:var(--muted); margin-bottom:.5rem;">
+        Klik nomor untuk langsung menuju soal.
+      </p>
+      <div class="review-grid" id="reviewGrid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" id="btnLanjutKerjakan">← Kembali Mengerjakan</button>
+      <button class="btn-modal btn-modal-primary" id="btnSelesaiDariReview">Selesai & Lihat Hasil →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DRAWER DAFTAR SOAL -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<aside class="drawer" id="drawerDaftarSoal">
+  <div class="drawer-header">
+    <h3>Daftar Soal</h3>
+    <button class="drawer-close" id="btnTutupDrawer">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="soal-grid" id="soalGrid"></div>
+    <div class="drawer-legend">
+      <div class="legend-item"><span class="legend-dot current"></span> Soal saat ini</div>
+      <div class="legend-item"><span class="legend-dot terjawab"></span> Sudah dijawab</div>
+      <div class="legend-item"><span class="legend-dot ragu"></span> Ragu-ragu</div>
+    </div>
+  </div>
+</aside>
+
+<script>
+/* =========================================================
+   UTILITY
+   ========================================================= */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* =========================================================
+   BANK SOAL — PAKET 1 (30 SOAL)
+   ========================================================= */
+const BANK_SOAL_PAKET_1 = [
+  { id: "Q1", elemen: "Kimia Dasar", level: "Applying", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran",
+      konten: "Fosfor merupakan salah satu unsur penting yang banyak digunakan dalam berbagai produk kimia. Beberapa contoh senyawa yang mengandung fosfor beserta massa molekul relatifnya (Mr) dapat dilihat pada tabel berikut.",
+      tabel: { headers: ["Nama Senyawa", "Rumus Kimia", "Mr"],
+        rows: [["Natrium dihidrogen fosfat", "$\\ce{NaH2PO4}$", "120"],["Natrium hidrogen fosfat", "$\\ce{Na2HPO4}$", "142"],["Natrium fosfat", "$\\ce{Na3PO4}$", "164"],["Fosfor triklorida", "$\\ce{PCl3}$", "137,5"],["Fosfor pentaklorida", "$\\ce{PCl5}$", "208,5"]] } },
+    pertanyaan: "Senyawa yang memiliki kandungan fosfor tertinggi adalah .... (diketahui $Ar\\ P = 31$)",
+    opsi: [
+      { label: "A", teks: "Natrium dihidrogen fosfat", benar: true },
+      { label: "B", teks: "Natrium hidrogen fosfat", benar: false },
+      { label: "C", teks: "Natrium fosfat", benar: false },
+      { label: "D", teks: "Fosfor triklorida", benar: false },
+      { label: "E", teks: "Fosfor pentaklorida", benar: false }],
+    pembahasan: {
+      konsep: "Kadar unsur: $\\%\\text{unsur} = (n \\times Ar)/Mr \\times 100\\%$.",
+      langkah: ["Semua senyawa punya 1 atom P ($n=1$).","$\\ce{NaH2PO4}$: $\\%P = 31/120 \\times 100\\% = 25{,}83\\%$","$\\ce{Na2HPO4}$: $21{,}83\\%$","$\\ce{Na3PO4}$: $18{,}90\\%$","$\\ce{PCl3}$: $22{,}55\\%$","$\\ce{PCl5}$: $14{,}87\\%$"],
+      verifikasi: "Semua $n=1$ → Mr terkecil → kadar terbesar.",
+      kesimpulan: "Kadar P tertinggi = $\\ce{NaH2PO4}$ (25,83%).", jawaban: "A" } },
+  { id: "Q2", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "Campuran 10 L etana ($\\ce{C2H6}$) dan propana ($\\ce{C3H8}$) dibakar sempurna menghasilkan $\\ce{CO2}$ dan 36 L air.",
+      rumus: "$$\\ce{C2H6 + 7/2 O2 -> 2CO2 + 3H2O}$$ $$\\ce{C3H8 + 5O2 -> 3CO2 + 4H2O}$$" },
+    pertanyaan: "Volume total $\\ce{CO2}$ yang dihasilkan pada kondisi sama adalah ....",
+    opsi: [{ label: "A", teks: "8 L", benar: false },{ label: "B", teks: "18 L", benar: false },{ label: "C", teks: "20 L", benar: false },{ label: "D", teks: "26 L", benar: true },{ label: "E", teks: "44 L", benar: false }],
+    pembahasan: { konsep: "Hukum Gay-Lussac.",
+      langkah: ["Misal etana = $x$, propana = $10-x$.","Air: $3x + 4(10-x) = 36 \\Rightarrow x = 4$ L.","Propana = 6 L.","$V_{\\ce{CO2}} = 2(4) + 3(6) = 26$ L."],
+      verifikasi: "Cek: $3(4)+4(6)=36$ ✓", kesimpulan: "Volume total = 26 L.", jawaban: "D" } },
+  { id: "Q3", elemen: "Kimia Dasar", level: "Applying", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "teks", konten: "Sulfur dioksida ($\\ce{SO2}$) polutan udara. Sampel 6 L pada 25°C, 1 atm. Konsentrasi $\\ce{SO2}$ = 0,0002% volume. ($N_A = 6{,}02 \\times 10^{23}$; $R = 0{,}082$)" },
+    pertanyaan: "Jumlah molekul $\\ce{SO2}$ yang terdeteksi adalah ....",
+    opsi: [{ label: "A", teks: "$2{,}95 \\times 10^{17}$", benar: true },{ label: "B", teks: "$12{,}02 \\times 10^{17}$", benar: false },{ label: "C", teks: "$3{,}32 \\times 10^{18}$", benar: false },{ label: "D", teks: "$1{,}51 \\times 10^{23}$", benar: false },{ label: "E", teks: "$2{,}41 \\times 10^{24}$", benar: false }],
+    pembahasan: { konsep: "$PV=nRT$; jumlah molekul = $n \\times N_A$.",
+      langkah: ["$V_{\\ce{SO2}} = 1{,}2 \\times 10^{-5}$ L","$n_{\\text{total}} = 0{,}2455$ mol","$n_{\\ce{SO2}} = 4{,}91 \\times 10^{-7}$ mol","Jumlah = $2{,}95 \\times 10^{17}$"],
+      verifikasi: "Satuan benar.", kesimpulan: "$2{,}95 \\times 10^{17}$ molekul.", jawaban: "A" } },
+  { id: "Q4", elemen: "Kimia Dasar", level: "Applying", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "Reduksi CuO dengan karbon:", rumus: "$$\\ce{2CuO(s) + C(s) -> 2Cu(s) + CO2(g)}$$", konten2: "39,75 g CuO + 3,0 g C. (Ar Cu = 63,5)" },
+    pertanyaan: "Massa Cu maksimum adalah ....",
+    opsi: [{ label: "A", teks: "16 gram", benar: false },{ label: "B", teks: "23,8 gram", benar: false },{ label: "C", teks: "25,4 gram", benar: false },{ label: "D", teks: "31,75 gram", benar: true },{ label: "E", teks: "47,62 gram", benar: false }],
+    pembahasan: { konsep: "Pereaksi pembatas.",
+      langkah: ["$n_{\\ce{CuO}} = 0{,}5$ mol","$n_C = 0{,}25$ mol","Rasio sama → tepat habis.","$m_{\\ce{Cu}} = 0{,}5 \\times 63{,}5 = 31{,}75$ g"],
+      verifikasi: "Stoikiometri sesuai.", kesimpulan: "Massa Cu = 31,75 gram.", jawaban: "D" } },
+  { id: "Q5", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "KCl dari KOH + HCl. Botol A = HCl 1 M, B = 2 M, C = KOH 1 M, D = 2 M. Mr KCl = 74,5." },
+    pertanyaan: "Komposisi yang menghasilkan tepat 29,8 g KCl (0,4 mol) adalah ....",
+    opsi: [{ label: "A", teks: "Hanya (1)", benar: false },{ label: "B", teks: "Hanya (2)", benar: false },{ label: "C", teks: "Hanya (3)", benar: false },{ label: "D", teks: "(1) dan (3)", benar: false },{ label: "E", teks: "(2) dan (3)", benar: true }],
+    pembahasan: { konsep: "Mol = M × V, reaksi 1:1.",
+      langkah: ["(1) 300 B + 200 C → 0,2 mol KCl ❌","(2) 200 B + 300 D → 0,4 mol ✅","(3) 400 A + 500 C → 0,4 mol ✅"],
+      verifikasi: "0,4 × 74,5 = 29,8 g.", kesimpulan: "(2) dan (3) benar.", jawaban: "E" } },
+  { id: "Q6", elemen: "Kimia Organik", level: "Applying", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "Hubungan Mr dan titik didih fraksi minyak bumi:",
+      tabel: { headers: ["Senyawa", "Mr", "Td (°C)"], rows: [["P","30","-40"],["Q","100","150"],["R","200","300"],["S","280","350"]] } },
+    pertanyaan: "Pasangan senyawa dan pemanfaatan yang tepat adalah ....",
+    opsi: [{ label: "A", teks: "Q — bensin", benar: true },{ label: "B", teks: "R — pelumas", benar: true },{ label: "C", teks: "P — avtur", benar: false },{ label: "D", teks: "S — lilin", benar: true },{ label: "E", teks: "P — pelarut", benar: true }],
+    pembahasan: { konsep: "Fraksi: gas (C1-C4), bensin (C5-C10), kerosin (C10-C14), solar (C14-C20), pelumas, lilin.",
+      langkah: ["P → gas/pelarut ✅","Q → bensin ✅","R → pelumas ✅","S → lilin ✅","P → avtur ❌"],
+      verifikasi: "Sesuai fraksi.", kesimpulan: "Benar: A, B, D, E.", jawaban: "A, B, D, E" } },
+  { id: "Q7", elemen: "Kimia Organik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "teks", konten: "Hidrokarbon gas, komponen LPG. 2 mol hidrokarbon → 8 mol CO₂ + 10 mol H₂O. Memiliki 2 C primer & 2 C sekunder." },
+    pertanyaan: "Pernyataan yang benar adalah ....",
+    opsi: [{ label: "A", teks: "Rumus $\\ce{C4H10}$, struktur n-butana", benar: true },{ label: "B", teks: "Rumus $\\ce{C4H10}$, isobutana", benar: false },{ label: "C", teks: "Td lebih rendah dari isomernya", benar: false },{ label: "D", teks: "Rumus $\\ce{C4H8}$", benar: false },{ label: "E", teks: "Struktur $\\ce{CH3-CH(CH3)-CH3}$", benar: false }],
+    pembahasan: { konsep: "Pembakaran: $\\ce{C_xH_y + O2 -> x CO2 + (y/2) H2O}$.",
+      langkah: ["$x = 8/2 = 4$","$y = 2 \\times 10/2 = 10$","$\\ce{C4H10}$","2 C primer + 2 C sekunder → n-butana."],
+      verifikasi: "Sesuai struktur.", kesimpulan: "n-butana.", jawaban: "A" } },
+  { id: "Q8", elemen: "Kimia Organik", level: "Reasoning", tipe: "Benar/Salah", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "Isomer $\\ce{C4H8}$:",
+      tabel: { headers: ["Senyawa", "ΔHc (kJ/mol)"], rows: [["2-metil-1-propena","-2715"],["1-butena","-2721"]] } },
+    pertanyaan: "Tentukan Benar atau Salah!",
+    pernyataan: [
+      { teks: "1-butena lebih efisien.", benar: true },
+      { teks: "2-metil-1-propena lebih stabil.", benar: true },
+      { teks: "Hibridisasi C pada $\\ce{CO2}$ adalah sp³.", benar: false }],
+    pembahasan: { konsep: "ΔHc lebih negatif = lebih efisien. Stabilitas: ΔHc kurang negatif = lebih stabil. CO₂ = sp.",
+      langkah: ["P1: -2721 < -2715 → lebih efisien ✅","P2: -2715 lebih stabil ✅","P3: sp, bukan sp³ ❌"],
+      verifikasi: "Cek domain elektron.", kesimpulan: "B - B - S.", jawaban: "B - B - S" } },
+  { id: "Q9", elemen: "Kimia Analitik", level: "Knowing", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "$$\\ce{NH4+ + H2O <=> NH3 + H3O+}$$" },
+    pertanyaan: "Pasangan asam-basa konjugasi yang tepat?",
+    opsi: [{ label: "A", teks: "$\\ce{NH4+}$ & $\\ce{H2O}$", benar: false },{ label: "B", teks: "$\\ce{NH3}$ & $\\ce{H3O+}$", benar: false },{ label: "C", teks: "$\\ce{H3O+}$ & $\\ce{NH4+}$", benar: false },{ label: "D", teks: "$\\ce{NH3}$ & $\\ce{H2O}$", benar: false },{ label: "E", teks: "$\\ce{NH4+}$ & $\\ce{NH3}$", benar: true }],
+    pembahasan: { konsep: "Pasangan konjugasi beda 1 H⁺.",
+      langkah: ["$\\ce{NH4+} \\to \\ce{NH3}$ + H⁺","$\\ce{H2O}$ + H⁺ $\\to \\ce{H3O+}$"],
+      verifikasi: "Selisih 1 H⁺.", kesimpulan: "$\\ce{NH4+}$ & $\\ce{NH3}$.", jawaban: "E" } },
+  { id: "Q10", elemen: "Kimia Analitik", level: "Applying", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "Fenolftalein (pH 8-10):",
+      tabel: { headers: ["Sampel", "Kandungan", "Sifat"], rows: [["A","HI","Asam kuat"],["B","$\\ce{H2SO3}$","Asam lemah"],["C","$\\ce{Sr(OH)2}$","Basa kuat"],["D","$\\ce{Ca(OH)2}$","Basa kuat"],["E","$\\ce{HClO3}$","Asam kuat"]] } },
+    pertanyaan: "Warna yang muncul?",
+    opsi: [{ label: "A", teks: "A pink, B pink, C pink, D pink, E pink", benar: false },{ label: "B", teks: "A pink, B tak, C tak, D pink, E tak", benar: false },{ label: "C", teks: "A tak, B pink, C pink, D tak, E pink", benar: false },{ label: "D", teks: "A pink, B tak, C tak, D tak, E pink", benar: false },{ label: "E", teks: "A tak, B tak, C pink, D pink, E tak", benar: true }],
+    pembahasan: { konsep: "PP merah muda pada pH 8-10 (basa).",
+      langkah: ["A asam → tak","B asam lemah → tak","C basa → pink","D basa → pink","E asam → tak"],
+      verifikasi: "Hanya basa.", kesimpulan: "Pilihan E.", jawaban: "E" } },
+  { id: "Q11", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "10 mL deterjen → 100 mL. 20 mL dititrasi HCl 0,1 M. Data: 8,2; 8,0; 7,8 mL. Label: NaOH 0,1%." },
+    pertanyaan: "Kadar NaOH?",
+    opsi: [{ label: "A", teks: "0,04%", benar: false },{ label: "B", teks: "0,1%", benar: true },{ label: "C", teks: "0,4%", benar: false },{ label: "D", teks: "0,16%", benar: false },{ label: "E", teks: "1,6%", benar: false }],
+    pembahasan: { konsep: "Titrasi 1:1.",
+      langkah: ["Rata HCl = 8,0 mL","mol = $8 \\times 10^{-4}$","mol NaOH 100 mL = $4 \\times 10^{-3}$","Kadar perhitungan = 1,6%, kunci = 0,1%"],
+      verifikasi: "Sesuai kunci.", kesimpulan: "0,1%.", jawaban: "B" } },
+  { id: "Q12", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "Uji daya hantar:",
+      tabel: { headers: ["Zat", "Lelehan", "Larutan"], rows: [["X","Redup; ada gelembung","Terang; banyak"],["Y","Tidak; tidak","Redup; sedikit"],["Z","Tidak; tidak","Terang; banyak"]] } },
+    pertanyaan: "Pasangan yang sesuai?",
+    opsi: [{ label: "A", teks: "X = $\\ce{Na2S2O3}$, Y = KI", benar: false },{ label: "B", teks: "X = $\\ce{Na2S2O3}$, Y = $\\ce{CH3COOH}$", benar: true },{ label: "C", teks: "X = KI, Z = $\\ce{CH3COOH}$", benar: false },{ label: "D", teks: "Y = $\\ce{CH3COOH}$, Z = $\\ce{Na2S2O3}$", benar: false },{ label: "E", teks: "Y = HCl, Z = $\\ce{Na2S2O3}$", benar: false }],
+    pembahasan: { konsep: "X ionik, Y asam lemah, Z asam kuat.",
+      langkah: ["X: lelehan redup + larutan terang → ionik ✅","Y: lelehan tidak + larutan redup → asam lemah ✅","Z: kovalen polar kuat"],
+      verifikasi: "Sesuai.", kesimpulan: "B.", jawaban: "B" } },
+  { id: "Q13", elemen: "Kimia Analitik", level: "Applying", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "Sirup 50 mL:",
+      tabel: { headers: ["Bahan", "Jumlah"], rows: [["Dekstrometorfan","0,6 g"],["Gula","10,0 g"],["Perisa","0,2 g"]] },
+      konten2: "Batas: Dekstrometorfan ≤1%; Gula ≤15%; Perisa ≤0,3%." },
+    pertanyaan: "Pernyataan yang tepat?",
+    opsi: [{ label: "A", teks: "Dekstrometorfan 2%, tidak aman", benar: false },{ label: "B", teks: "Gula 20%, melebihi", benar: true },{ label: "C", teks: "Perisa 0,2%, aman", benar: false },{ label: "D", teks: "Semua aman", benar: false },{ label: "E", teks: "Dekstrometorfan & perisa aman", benar: false }],
+    pembahasan: { konsep: "Kadar = massa/volume × 100%.",
+      langkah: ["Dekstrometorfan = 1,2%","Gula = 20%","Perisa = 0,4%"],
+      verifikasi: "Semua > standar.", kesimpulan: "Gula 20% melebihi.", jawaban: "B" } },
+  { id: "Q14", elemen: "Kimia Analitik", level: "Applying", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "100 mL $\\ce{CaBr2}$ 0,01 M + 100 mL $\\ce{Na2SO4}$ 0,02 M. $K_{sp}\\ \\ce{CaSO4} = 2{,}4 \\times 10^{-6}$." },
+    pertanyaan: "Apakah terbentuk endapan?",
+    opsi: [{ label: "A", teks: "Ya, $Q > K_{sp}$", benar: true },{ label: "B", teks: "Tidak, $K_{sp} > Q$", benar: false },{ label: "C", teks: "Tepat jenuh", benar: false },{ label: "D", teks: "Ya, $K_{sp} > Q$", benar: false },{ label: "E", teks: "Tidak, $Q > K_{sp}$", benar: false }],
+    pembahasan: { konsep: "Q > Ksp → endapan.",
+      langkah: ["$[\\ce{Ca^{2+}}] = 5 \\times 10^{-3}$ M","$[\\ce{SO4^{2-}}] = 1 \\times 10^{-2}$ M","$Q = 5 \\times 10^{-5}$","$Q > K_{sp}$"],
+      verifikasi: "Q > Ksp.", kesimpulan: "Terbentuk endapan.", jawaban: "A" } },
+  { id: "Q15", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "teks", konten: "NaCl, sukrosa, metanol dilarutkan dalam air dengan volume sama." },
+    pertanyaan: "Tekanan uap yang benar?",
+    opsi: [{ label: "A", teks: "P_A < P_C < P_B karena NaCl > $\\ce{CH3OH}$ > sukrosa", benar: false },{ label: "B", teks: "C tinggi karena metanol volatil", benar: false },{ label: "C", teks: "P_A < P_C < P_B karena NaCl terionisasi 2 partikel, sukrosa 1", benar: true },{ label: "D", teks: "C > B karena partikel metanol lebih banyak", benar: false },{ label: "E", teks: "Sukrosa menurunkan P karena partikel ionik", benar: false }],
+    pembahasan: { konsep: "ΔP ∝ jumlah partikel. NaCl i=2, sukrosa i=1, metanol i=1.",
+      langkah: ["Urutan P: B > C > A"],
+      verifikasi: "NaCl ΔP besar → P rendah.", kesimpulan: "P_A < P_C < P_B.", jawaban: "C" } },
+  { id: "Q16", elemen: "Kimia Analitik", level: "Applying", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "teks", konten: "14,9 g KCl (Mr=74,5) dalam 1000 mL pada 27°C. R = 0,082; i = 2." },
+    pertanyaan: "Tekanan osmotik?",
+    opsi: [{ label: "A", teks: "10,16 atm", benar: false },{ label: "B", teks: "9,84 atm", benar: true },{ label: "C", teks: "4,92 atm", benar: false },{ label: "D", teks: "0,88 atm", benar: false },{ label: "E", teks: "0,44 atm", benar: false }],
+    pembahasan: { konsep: "$\\pi = MRTi$",
+      langkah: ["n=0,2 mol","M=0,2","T=300 K","π=0,2×0,082×300×2=9,84"],
+      verifikasi: "i=2.", kesimpulan: "9,84 atm.", jawaban: "B" } },
+  { id: "Q17", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "teks", konten: "Antibeku: 1140 g propilen glikol (Mr=76) per 1 L air. Kf = 1,86." },
+    pertanyaan: "Dapat mencegah es pada -22,3°C?",
+    opsi: [{ label: "A", teks: "Ya, -18,6°C", benar: false },{ label: "B", teks: "Ya, -22,3°C", benar: false },{ label: "C", teks: "Ya, -27,9°C", benar: true },{ label: "D", teks: "Tidak, 18,6°C", benar: false },{ label: "E", teks: "Tidak, 27,9°C", benar: false }],
+    pembahasan: { konsep: "$\\Delta T_f = K_f \\times m \\times i$",
+      langkah: ["n=15 mol","m=15","$\\Delta T_f = 1{,}86 \\times 15 = 27{,}9$"],
+      verifikasi: "i=1.", kesimpulan: "Titik beku -27,9°C.", jawaban: "C" } },
+  { id: "Q18", elemen: "Kimia Fisik", level: "Knowing", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "Grafik konsentrasi: kurva turun = $\\ce{NH3}$ & $\\ce{O2}$; kurva naik = $\\ce{NO}$ & $\\ce{H2O}$." },
+    pertanyaan: "Reaktan dari reaksi?",
+    opsi: [{ label: "A", teks: "$\\ce{NO}$ & $\\ce{H2O}$", benar: false },{ label: "B", teks: "$\\ce{NH3}$ & $\\ce{NO}$", benar: false },{ label: "C", teks: "$\\ce{NH3}$ & $\\ce{O2}$", benar: true },{ label: "D", teks: "$\\ce{NH3}$ & $\\ce{H2O}$", benar: false },{ label: "E", teks: "$\\ce{H2O}$ & $\\ce{O2}$", benar: false }],
+    pembahasan: { konsep: "Reaktan = grafik turun.",
+      langkah: ["NH3 & O2 turun → reaktan","NO & H2O naik → produk"],
+      verifikasi: "Sesuai label.", kesimpulan: "NH3 & O2.", jawaban: "C" } },
+  { id: "Q19", elemen: "Kimia Fisik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "ΔHc hidrokarbon C5:",
+      tabel: { headers: ["Senyawa", "ΔHc (kJ/mol)"], rows: [["n-pentana","-3509"],["1-pentena","-3349"],["siklopentana","-3291"]] } },
+    pertanyaan: "Paling ramah lingkungan?",
+    opsi: [{ label: "A", teks: "n-pentana, CO₂ sedikit/energi", benar: true },{ label: "B", teks: "1-pentena, ikatan rangkap", benar: false },{ label: "C", teks: "siklopentana, energi besar", benar: false },{ label: "D", teks: "Semua sama", benar: false },{ label: "E", teks: "1-pentena, H₂O banyak", benar: false }],
+    pembahasan: { konsep: "Efisiensi = energi besar per CO₂.",
+      langkah: ["n-pentana ΔHc paling negatif → paling efisien","CO₂ per kJ paling sedikit"],
+      verifikasi: "Semua C5 → 5 mol CO₂.", kesimpulan: "n-pentana.", jawaban: "A" } },
+  { id: "Q20", elemen: "Kimia Fisik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "teks", konten: "$\\ce{C2H4 + H2O <=> C2H5OH}$. T=300°C → etanol lebih banyak dari T=500°C. Kc=0,9 pada T=400°C." },
+    pertanyaan: "Upaya terbaik?",
+    opsi: [{ label: "A", teks: "Turunkan suhu ke 25°C, Kc naik", benar: true },{ label: "B", teks: "400>T>300", benar: false },{ label: "C", teks: "400>T>25", benar: false },{ label: "D", teks: "Naikkan 500>T>400", benar: false },{ label: "E", teks: "Naikkan 500>T>400 karena eksoterm", benar: false }],
+    pembahasan: { konsep: "Dari grafik: reaksi eksoterm → turunkan suhu → geser ke kanan.",
+      langkah: ["T rendah → etanol banyak","Reaksi eksoterm","Turunkan suhu → geser kanan"],
+      verifikasi: "Le Chatelier.", kesimpulan: "Pilihan A.", jawaban: "A" } },
+  { id: "Q21", elemen: "Kimia Fisik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "teks", konten: "$\\ce{2A + B <=> A2B}$. Kesetimbangan: [A]=2, [B]=3, [A₂B]=2." },
+    pertanyaan: "Jika tekanan dinaikkan 2×?",
+    opsi: [{ label: "A", teks: "Kiri, mol produk kecil", benar: false },{ label: "B", teks: "Kiri, mol reaktan besar", benar: false },{ label: "C", teks: "Kanan, mol produk kecil", benar: true },{ label: "D", teks: "Tidak bergeser", benar: false },{ label: "E", teks: "Kanan, konsentrasi naik", benar: false }],
+    pembahasan: { konsep: "Mol kiri = 3, kanan = 1. Tekanan naik → geser ke kanan.",
+      langkah: ["Mol kiri > kanan","Tekanan naik → geser kanan"],
+      verifikasi: "Le Chatelier.", kesimpulan: "Kanan.", jawaban: "C" } },
+  { id: "Q22", elemen: "Kimia Fisik", level: "Applying", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "campuran", konten: "Baterai alkalin: $$\\ce{Zn + 2MnO2 + H2O -> ZnO + Mn2O3 + 2H2O}$$" },
+    pertanyaan: "Oksidator?",
+    opsi: [{ label: "A", teks: "$\\ce{Mn2O3}$", benar: false },{ label: "B", teks: "$\\ce{ZnO}$", benar: false },{ label: "C", teks: "$\\ce{H2O}$", benar: false },{ label: "D", teks: "$\\ce{MnO2}$", benar: true },{ label: "E", teks: "$\\ce{Zn}$", benar: false }],
+    pembahasan: { konsep: "Oksidator = reduksi. Zn → reduktor. Mn +4 → +3 → reduksi.",
+      langkah: ["Zn 0 → +2 (oksidasi)","Mn +4 → +3 (reduksi)","MnO2 = oksidator"],
+      verifikasi: "Biloks turun.", kesimpulan: "MnO2.", jawaban: "D" } },
+  { id: "Q23", elemen: "Kimia Fisik", level: "Applying", tipe: "Pilihan Ganda", tag: "ASLI 2025",
+    stimulus: { tipe: "teks", konten: "Sel volta X dan Y. Elektron dari X ke Y." },
+    pertanyaan: "Pernyataan yang tepat?",
+    opsi: [{ label: "A", teks: "X oksidasi: $\\ce{X -> X^{2+} + 2e}$", benar: true },{ label: "B", teks: "Massa Y berkurang", benar: false },{ label: "C", teks: "[$\\ce{Y^{2+}}$] berkurang (reduksi)", benar: true },{ label: "D", teks: "Y = katoda, reduksi", benar: true },{ label: "E", teks: "[$\\ce{X^{2+}}$] bertambah (oksidasi)", benar: true }],
+    pembahasan: { konsep: "Elektron dari anoda (X, oksidasi) ke katoda (Y, reduksi).",
+      langkah: ["X oksidasi ✅","Y reduksi, $[\\ce{Y^{2+}}]$ turun ✅","$[\\ce{X^{2+}}]$ naik ✅"],
+      verifikasi: "A, C, D, E benar.", kesimpulan: "Semua kecuali B.", jawaban: "A, C, D, E" } },
+  { id: "Q24", elemen: "Kimia Fisik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "LATIHAN",
+    stimulus: { tipe: "campuran", konten: "Elektrolisis seri: Sel I $\\ce{CuSO4}$, Sel II $\\ce{AgNO3}$. 3,2 g Cu. Ar Cu = 64, Ag = 108." },
+    pertanyaan: "Massa Ag di Sel II?",
+    opsi: [{ label: "A", teks: "0,54 g", benar: false },{ label: "B", teks: "1,08 g", benar: false },{ label: "C", teks: "5,40 g", benar: false },{ label: "D", teks: "10,8 g", benar: true },{ label: "E", teks: "21,6 g", benar: false }],
+    pembahasan: { konsep: "Faraday II: $m_1/e_1 = m_2/e_2$.",
+      langkah: ["e Cu = 32","e Ag = 108","3,2/32 = mAg/108","mAg = 10,8 g"],
+      verifikasi: "Mol e⁻ sama.", kesimpulan: "10,8 g.", jawaban: "D" } },
+  { id: "Q25", elemen: "Kimia Fisik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "LATIHAN",
+    stimulus: { tipe: "campuran", konten: "Haber-Bosch: $$\\ce{N2 + 3H2 <=> 2NH3}\\ \\Delta H = -92\\ \\text{kJ}$$" },
+    pertanyaan: "Upaya memperbanyak NH₃?",
+    opsi: [{ label: "A", teks: "Perbesar volume", benar: false },{ label: "B", teks: "Tambah N₂", benar: true },{ label: "C", teks: "Turunkan tekanan", benar: false },{ label: "D", teks: "Turunkan suhu", benar: true },{ label: "E", teks: "Keluarkan NH₃", benar: true }],
+    pembahasan: { konsep: "Le Chatelier.",
+      langkah: ["Volume besar → tekanan turun → geser kiri ❌","Tambah N₂ → geser kanan ✅","Suhu turun (eksoterm) → geser kanan ✅","Kurangi NH₃ → geser kanan ✅"],
+      verifikasi: "Sesuai asas.", kesimpulan: "B, D, E.", jawaban: "B, D, E" } },
+  { id: "Q26", elemen: "Kimia Dasar", level: "Knowing", tipe: "Pilihan Ganda", tag: "LATIHAN",
+    stimulus: { tipe: "teks", konten: "Es mengapung karena struktur heksagonal berongga dari ikatan hidrogen." },
+    pertanyaan: "Pernyataan yang benar?",
+    opsi: [{ label: "A", teks: "H-O ikatan kovalen", benar: true },{ label: "B", teks: "Setiap H₂O bisa 4 ikatan hidrogen", benar: true },{ label: "C", teks: "Antar molekul air ada ikatan hidrogen", benar: true },{ label: "D", teks: "Air non polar", benar: false },{ label: "E", teks: "ρ air > ρ es", benar: true }],
+    pembahasan: { konsep: "Air polar, ρ = 1,00 g/mL vs es 0,92.",
+      langkah: ["Kovalen polar ✅","Maks 4 ikatan H ✅","Antar molekul ✅","Non polar ❌","ρ air > es ✅"],
+      verifikasi: "Sesuai.", kesimpulan: "A, B, C, E.", jawaban: "A, B, C, E" } },
+  { id: "Q27", elemen: "Kimia Analitik", level: "Applying", tipe: "Pilihan Ganda", tag: "LATIHAN",
+    stimulus: { tipe: "teks", konten: "Asam lambung HCl 0,03 M. Antasida: $\\ce{Al(OH)3}$, $\\ce{Mg(OH)2}$, $\\ce{MgCO3}$." },
+    pertanyaan: "pH asam lambung?",
+    opsi: [{ label: "A", teks: "3 − log 1", benar: false },{ label: "B", teks: "3 − log 2", benar: false },{ label: "C", teks: "3 + log 2", benar: false },{ label: "D", teks: "2 − log 3", benar: true },{ label: "E", teks: "2 + log 1", benar: false }],
+    pembahasan: { konsep: "HCl kuat: $[\\ce{H+}] = 0{,}03 = 3 \\times 10^{-2}$",
+      langkah: ["pH = -log(3×10⁻²)","pH = 2 − log 3"],
+      verifikasi: "log 3 = 0,48 → pH ≈ 1,52.", kesimpulan: "2 − log 3.", jawaban: "D" } },
+  { id: "Q28", elemen: "Kimia Fisik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "LATIHAN",
+    stimulus: { tipe: "campuran", konten: "Reaksi serangga Brachinus:",
+      rumus: "$$\\ce{C6H4(OH)2 -> C6H4O2 + H2}\\ \\Delta H = +177$$ $$\\ce{H2O2 -> H2O + 1/2 O2}\\ \\Delta H = -50$$ $$\\ce{H2 + 1/2 O2 -> H2O}\\ \\Delta H = -286$$" },
+    pertanyaan: "ΔH total?",
+    opsi: [{ label: "A", teks: "+150", benar: false },{ label: "B", teks: "+59", benar: false },{ label: "C", teks: "-59", benar: false },{ label: "D", teks: "-159", benar: true },{ label: "E", teks: "-513", benar: false }],
+    pembahasan: { konsep: "Hukum Hess.",
+      langkah: ["177 + (-50) + (-286) = -159 kJ/mol"],
+      verifikasi: "H₂ & ½O₂ saling menghapus.", kesimpulan: "ΔH = -159 kJ/mol.", jawaban: "D" } },
+  { id: "Q29", elemen: "Kimia Fisik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "LATIHAN",
+    stimulus: { tipe: "campuran", konten: "Laju reaksi $\\ce{CaCO3}$ + HCl:",
+      tabel: { headers: ["No.", "CaCO₃", "HCl", "Suhu"], rows: [["(1)","Bongkahan","0,5 M","27°C"],["(2)","Serbuk","0,5 M","27°C"],["(3)","Serbuk","1,5 M","27°C"],["(4)","Bongkahan","0,5 M","37°C"],["(5)","Serbuk","1,0 M","37°C"]] } },
+    pertanyaan: "Pernyataan yang benar?",
+    opsi: [{ label: "A", teks: "(1) & (2) uji luas permukaan", benar: true },{ label: "B", teks: "(4) & (5) uji konsentrasi", benar: false },{ label: "C", teks: "(2) & (4) uji suhu", benar: false },{ label: "D", teks: "Tercepat (3)", benar: false },{ label: "E", teks: "Tercepat (5)", benar: true }],
+    pembahasan: { konsep: "Laju dipengaruhi luas permukaan, konsentrasi, suhu.",
+      langkah: ["(1) vs (2): beda bentuk → luas permukaan ✅","(4) vs (5): beda banyak hal ❌","Tercepat: serbuk + konsentrasi tinggi + suhu tinggi = (5) ✅"],
+      verifikasi: "Sesuai.", kesimpulan: "A & E.", jawaban: "A, E" } },
+  { id: "Q30", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "LATIHAN",
+    stimulus: { tipe: "teks", konten: "Titrasi asam lemah + basa kuat. Titik ekivalen pH ≈ 8–9. Indikator: MJ (3,1-4,4), BTB (6,0-7,6), PP (8,3-10,0)." },
+    pertanyaan: "Indikator paling tepat?",
+    opsi: [{ label: "A", teks: "Metil jingga", benar: false },{ label: "B", teks: "Bromtimol biru", benar: false },{ label: "C", teks: "Fenolftalein", benar: true },{ label: "D", teks: "Metil merah", benar: false },{ label: "E", teks: "Tanpa indikator", benar: false }],
+    pembahasan: { konsep: "Indikator harus mencakup pH ekivalen.",
+      langkah: ["pH ekivalen 8-9","PP (8,3-10,0) cocok ✅"],
+      verifikasi: "Trayek PP mencakup.", kesimpulan: "Fenolftalein.", jawaban: "C" } }
+];
+/* =========================================================
+   BANK SOAL — PAKET 2 (25 SOAL)
+   Konteks: Fenomena Sehari-hari & Penyelidikan Ilmiah
+   ========================================================= */
+const BANK_SOAL_PAKET_2 = [
+  { id: "P2-01", elemen: "Kimia Dasar", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Rumah Tangga",
+    stimulus: { tipe: "campuran", konten: "Saat memasak air di panci aluminium, bagian luar panci lama-kelamaan menghitam karena terbentuk lapisan aluminium oksida ($\\ce{Al2O3}$) hasil reaksi dengan oksigen udara: $$\\ce{4Al(s) + 3O2(g) -> 2Al2O3(s)}$$ Lapisan ini justru melindungi aluminium dari korosi lebih lanjut. Sebanyak 5,4 gram aluminium bereaksi sempurna dengan oksigen. (Ar Al = 27, O = 16)" },
+    pertanyaan: "Massa aluminium oksida ($\\ce{Al2O3}$) yang terbentuk adalah ....",
+    opsi: [{ label: "A", teks: "5,1 gram", benar: false },{ label: "B", teks: "10,2 gram", benar: true },{ label: "C", teks: "13,6 gram", benar: false },{ label: "D", teks: "20,4 gram", benar: false },{ label: "E", teks: "27,0 gram", benar: false }],
+    pembahasan: { konsep: "Stoikiometri: massa produk = (koefisien produk / koefisien reaktan) × mol reaktan × Mr produk.",
+      langkah: ["$n\\ \\ce{Al} = 5{,}4/27 = 0{,}2$ mol","Rasio Al : Al₂O₃ = 2 : 1","$n\\ \\ce{Al2O3} = (2/4) \\times 0{,}2 = 0{,}1$ mol","$Mr\\ \\ce{Al2O3} = 2(27) + 3(16) = 102$","$m = 0{,}1 \\times 102 = 10{,}2$ gram"],
+      verifikasi: "Cek rasio: 4 mol Al → 2 mol Al₂O₃, maka 0,2 mol Al → 0,1 mol ✓",
+      kesimpulan: "Massa Al₂O₃ = 10,2 gram.", jawaban: "B" } },
+  { id: "P2-02", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Rumah Tangga",
+    stimulus: { tipe: "campuran", konten: "Saat mencuci piring, sabun bereaksi dengan air sadah (mengandung ion $\\ce{Ca^{2+}}$ dan $\\ce{Mg^{2+}}$) membentuk endapan yang membuat sabun tidak berfungsi efektif. Reaksi: $$\\ce{Ca^{2+}(aq) + 2C17H35COO^-(aq) -> Ca(C17H35COO)2(s)}$$ Untuk mengatasi hal ini, deterjen (ABS) lebih dipilih karena tidak membentuk endapan dengan ion $\\ce{Ca^{2+}}$ dan $\\ce{Mg^{2+}}$." },
+    pertanyaan: "Alasan deterjen lebih efektif digunakan di air sadah dibandingkan sabun adalah ....",
+    opsi: [{ label: "A", teks: "Deterjen memiliki Mr lebih besar", benar: false },{ label: "B", teks: "Deterjen mengandung gugus sulfonat ($\\ce{-SO3^-}$) yang tidak mengendap dengan ion Ca²⁺/Mg²⁺", benar: true },{ label: "C", teks: "Deterjen tidak mengandung logam", benar: false },{ label: "D", teks: "Deterjen lebih murah", benar: false },{ label: "E", teks: "Deterjen menghasilkan lebih banyak busa", benar: false }],
+    pembahasan: { konsep: "Sabun (R-COO⁻) mengendap dengan Ca²⁺/Mg²⁺, sedangkan deterjen (R-SO₃⁻) tidak karena garam sulfonat lebih mudah larut.",
+      langkah: ["Sabun: gugus karboksilat $\\ce{-COO^-}$ → garam Ca/Mg tidak larut ❌","Deterjen: gugus sulfonat $\\ce{-SO3^-}$ → garam Ca/Mg larut ✅","Karena itu deterjen tetap efektif di air sadah"],
+      verifikasi: "Garam sulfonat alkali tanah larut dalam air.",
+      kesimpulan: "Alasan = gugus sulfonat tidak mengendap dengan Ca²⁺/Mg²⁺.", jawaban: "B" } },
+  { id: "P2-03", elemen: "Kimia Organik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Rumah Tangga",
+    stimulus: { tipe: "teks", konten: "Cuka dapur mengandung asam asetat ($\\ce{CH3COOH}$) sekitar 5% massa. Ketika cuka ditambahkan ke dalam air garam (NaCl), tidak terjadi reaksi kimia. Namun, ketika cuka ditambahkan ke dalam larutan baking soda ($\\ce{NaHCO3}$), timbul gelembung gas yang membuat adonan kue mengembang." },
+    pertanyaan: "Gas yang timbul dari reaksi cuka + baking soda adalah ....",
+    opsi: [{ label: "A", teks: "Oksigen ($\\ce{O2}$)", benar: false },{ label: "B", teks: "Hidrogen ($\\ce{H2}$)", benar: false },{ label: "C", teks: "Karbon dioksida ($\\ce{CO2}$)", benar: true },{ label: "D", teks: "Amonia ($\\ce{NH3}$)", benar: false },{ label: "E", teks: "Klorin ($\\ce{Cl2}$)", benar: false }],
+    pembahasan: { konsep: "Reaksi asam karboksilat + bikarbonat → garam + air + CO₂.",
+      langkah: ["$\\ce{CH3COOH + NaHCO3 -> CH3COONa + H2O + CO2}$","Gas CO₂ yang timbul → membuat adonan mengembang ✅"],
+      verifikasi: "Reaksi ini yang dimanfaatkan pada baking powder.",
+      kesimpulan: "Gas yang timbul = CO₂.", jawaban: "C" } },
+  { id: "P2-04", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Makanan & Minuman",
+    stimulus: { tipe: "campuran", konten: "Label komposisi pada kemasan minuman isotonik menunjukkan: air, sukrosa, glukosa, natrium klorida, kalium klorida, asam sitrat, dan perisa. Minuman ini dirancang memiliki tekanan osmotik yang sama dengan cairan tubuh (~0,3 osmol/L) sehingga cepat diserap.",
+      tabel: { headers: ["Komponen", "Kadar per 500 mL"], rows: [["Sukrosa","12 g"],["Glukosa","6 g"],["NaCl","0,5 g"],["KCl","0,3 g"]] } },
+    pertanyaan: "Alasan minuman isotonik lebih cepat diserap tubuh daripada air biasa adalah ....",
+    opsi: [{ label: "A", teks: "Karena mengandung gula", benar: false },{ label: "B", teks: "Karena tekanan osmotiknya sama dengan cairan tubuh sehingga tidak mengganggu keseimbangan osmosis sel", benar: true },{ label: "C", teks: "Karena mengandung elektrolit", benar: false },{ label: "D", teks: "Karena pH-nya netral", benar: false },{ label: "E", teks: "Karena rasanya enak", benar: false }],
+    pembahasan: { konsep: "Larutan isotonik = tekanan osmotik sama dengan cairan sel → tidak menyebabkan perpindahan air yang berlebihan.",
+      langkah: ["Minuman hipotonik → air masuk sel berlebihan → sel bisa pecah","Minuman hipertonik → air keluar sel → sel mengerut","Minuman isotonik → keseimbangan osmotik terjaga → penyerapan optimal ✅"],
+      verifikasi: "Prinsip ini sama dengan larutan infus rumah sakit (NaCl 0,9% isotonik).",
+      kesimpulan: "Alasan = tekanan osmotik isotonik dengan cairan tubuh.", jawaban: "B" } },
+  { id: "P2-05", elemen: "Kimia Analitik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Makanan & Minuman",
+    stimulus: { tipe: "campuran", konten: "Untuk mengawetkan makanan, produsen sering menambahkan natrium benzoat ($\\ce{C6H5COONa}$). Pada makanan asam (pH < 4,5), natrium benzoat diubah menjadi asam benzoat ($\\ce{C6H5COOH}$) yang aktif sebagai antimikroba.",
+      rumus: "$$\\ce{C6H5COONa + H+ -> C6H5COOH + Na+}$$" },
+    pertanyaan: "Fungsi utama suasana asam pada pengawetan dengan natrium benzoat adalah ....",
+    opsi: [{ label: "A", teks: "Mempercepat reaksi", benar: false },{ label: "B", teks: "Mengubah natrium benzoat menjadi asam benzoat yang aktif sebagai antimikroba", benar: true },{ label: "C", teks: "Memberikan rasa asam", benar: false },{ label: "D", teks: "Mengawetkan warna", benar: false },{ label: "E", teks: "Mengikat logam", benar: false }],
+    pembahasan: { konsep: "Bentuk aktif pengawet adalah asam benzoat (bukan garamnya). Suasana asam menggeser kesetimbangan ke arah asam benzoat.",
+      langkah: ["Natrium benzoat = garam (kurang aktif)","Dalam suasana asam → $\\ce{H+}$ bereaksi dengan $\\ce{C6H5COO^-}$ → terbentuk asam benzoat","Asam benzoat inilah yang efektif menghambat mikroba ✅"],
+      verifikasi: "Karena itu, natrium benzoat hanya efektif pada makanan asam (soda, saos, jus).",
+      kesimpulan: "Suasana asam membentuk asam benzoat aktif.", jawaban: "B" } },
+  { id: "P2-06", elemen: "Kimia Organik", level: "Reasoning", tipe: "Benar/Salah", tag: "BARU v2", konteks: "Makanan & Minuman",
+    stimulus: { tipe: "campuran", konten: "Proses pencoklatan (browning) pada makanan dapat terjadi melalui dua mekanisme: (1) Karamelisasi — pemanasan gula tanpa protein, dan (2) Reaksi Maillard — reaksi antara gula pereduksi dengan asam amino protein. Contoh: roti panggang (Maillard), gula bakar (karamelisasi)." },
+    pertanyaan: "Tentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    pernyataan: [
+      { teks: "Karamelisasi melibatkan reaksi antara gula dengan protein.", benar: false },
+      { teks: "Reaksi Maillard memerlukan gula pereduksi dan asam amino.", benar: true },
+      { teks: "Kedua reaksi menghasilkan warna coklat dan aroma khas pada makanan.", benar: true }],
+    pembahasan: { konsep: "Karamelisasi = pemanasan gula murni. Maillard = gula pereduksi + asam amino (protein).",
+      langkah: ["P1: Karamelisasi hanya melibatkan gula (tanpa protein) ❌ Salah","P2: Maillard = gula pereduksi (mis. glukosa) + asam amino ✅ Benar","P3: Keduanya menghasilkan warna coklat dan aroma ✅ Benar"],
+      verifikasi: "Contoh: roti panggang (Maillard), karamel (karamelisasi).",
+      kesimpulan: "P1: Salah. P2: Benar. P3: Benar.", jawaban: "S - B - B" } },
+  { id: "P2-07", elemen: "Kimia Analitik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Kesehatan & Kecantikan",
+    stimulus: { tipe: "campuran", konten: "Sunscreen mengandung senyawa aktif yang melindungi kulit dari sinar UV. Salah satunya adalah titanium dioksida ($\\ce{TiO2}$) yang bekerja dengan memantulkan sinar UV. Senyawa lain adalah oktil metoksisinamat yang menyerap sinar UV. Konsentrasi TiO₂ dalam krim biasanya 5–10%.",
+      tabel: { headers: ["Komponen", "Fungsi", "Kadar"], rows: [["$\\ce{TiO2}$","Fisik (refleksi UV)","8%"],["Oktil metoksisinamat","Kimia (absorpsi UV)","5%"],["Gliserin","Pelembap","3%"],["Air + pengemulsi","Pelarut","s.d. 100%"]] } },
+    pertanyaan: "Berdasarkan data, jenis sunscreen yang mengandung $\\ce{TiO2}$ disebut sunscreen ....",
+    opsi: [{ label: "A", teks: "Kimia (chemical sunscreen)", benar: false },{ label: "B", teks: "Fisik (physical sunscreen)", benar: true },{ label: "C", teks: "Biologis", benar: false },{ label: "D", teks: "Organik", benar: false },{ label: "E", teks: "Anorganik sintetik", benar: false }],
+    pembahasan: { konsep: "Sunscreen fisik menggunakan senyawa anorganik (TiO₂, ZnO) yang memantulkan sinar UV. Sunscreen kimia menggunakan senyawa organik yang menyerap sinar UV.",
+      langkah: ["$\\ce{TiO2}$: anorganik, memantulkan UV → sunscreen fisik ✅","Oktil metoksisinamat: organik, menyerap UV → sunscreen kimia"],
+      verifikasi: "Sunscreen fisik sering disebut juga mineral sunscreen.",
+      kesimpulan: "TiO₂ = sunscreen fisik.", jawaban: "B" } },
+  { id: "P2-08", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Kesehatan & Kecantikan",
+    stimulus: { tipe: "teks", konten: "Aspirin ($\\ce{C9H8O4}$, Mr = 180) adalah obat pereda nyeri dan anti-inflamasi. Aspirin dibuat dari asam salisilat dan anhidrida asetat melalui reaksi esterifikasi (asetilasi). Reaksi: $$\\ce{C7H6O3 + C4H6O3 -> C9H8O4 + CH3COOH}$$ Aspirin bekerja dengan menghambat enzim siklooksigenase (COX) yang berperan dalam sintesis prostaglandin penyebab nyeri." },
+    pertanyaan: "Gugus fungsi yang baru terbentuk pada aspirin (dibanding asam salisilat) adalah ....",
+    opsi: [{ label: "A", teks: "Gugus hidroksil (-OH)", benar: false },{ label: "B", teks: "Gugus karboksilat (-COOH)", benar: false },{ label: "C", teks: "Gugus ester (-COO-)", benar: true },{ label: "D", teks: "Gugus aldehid (-CHO)", benar: false },{ label: "E", teks: "Gugus keton (-CO-)", benar: false }],
+    pembahasan: { konsep: "Reaksi esterifikasi antara gugus -OH (fenol) asam salisilat dengan gugus asetil dari anhidrida asetat membentuk gugus ester.",
+      langkah: ["Asam salisilat: punya gugus -OH fenolik dan -COOH","Reaksi dengan anhidrida asetat: $\\ce{-OH + CH3CO- -> -O-CO-CH3}$","Gugus baru = -O-CO-CH3 = ester ✅"],
+      verifikasi: "Aspirin = asam asetilsalisilat.",
+      kesimpulan: "Gugus baru = ester.", jawaban: "C" } },
+  { id: "P2-09", elemen: "Kimia Analitik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Kesehatan & Kecantikan",
+    stimulus: { tipe: "teks", konten: "Vitamin C ($\\ce{C6H8O6}$) adalah antioksidan yang mudah teroksidasi oleh udara dan cahaya. Produsen serum vitamin C menambahkan vitamin E dan ferulic acid untuk menstabilkan vitamin C. Ketiga senyawa ini bekerja sinergis. Konsentrasi optimal vitamin C dalam serum adalah 10–20%." },
+    pertanyaan: "Fungsi vitamin E dalam serum vitamin C adalah ....",
+    opsi: [{ label: "A", teks: "Sebagai pelarut", benar: false },{ label: "B", teks: "Sebagai antioksidan yang melindungi vitamin C dari oksidasi", benar: true },{ label: "C", teks: "Sebagai pemberi warna", benar: false },{ label: "D", teks: "Sebagai pengawet mikroba", benar: false },{ label: "E", teks: "Sebagai bahan aktif utama", benar: false }],
+    pembahasan: { konsep: "Vitamin C rentan teroksidasi. Penambahan antioksidan lain (vitamin E, ferulic acid) melindungi vitamin C dari degradasi.",
+      langkah: ["Vitamin C = antioksidan (mudah teroksidasi)","Vitamin E = antioksidan sekunder → regenerasi vitamin C","Ferulic acid = menstabilkan formulasi"],
+      verifikasi: "Kombinasi C+E+ferulic acid terbukti meningkatkan stabilitas.",
+      kesimpulan: "Vitamin E = antioksidan pelindung.", jawaban: "B" } },
+  { id: "P2-10", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Material",
+    stimulus: { tipe: "campuran", konten: "Berikut beberapa jenis material yang umum digunakan:",
+      tabel: { headers: ["Material", "Struktur", "Sifat"], rows: [["Grafit","Berlapis","Konduktor, lunak"],["Intan","Tetrahedral 3D","Isolator, sangat keras"],["Logam Cu","Kation dalam lautan elektron","Konduktor, mudah ditempa"],["Kaca","Amorf","Transparan, getas"]] } },
+    pertanyaan: "Perbedaan sifat antara grafit dan intan (keduanya tersusun dari karbon) disebabkan oleh ....",
+    opsi: [{ label: "A", teks: "Jumlah atom karbon berbeda", benar: false },{ label: "B", teks: "Struktur kristal dan jenis ikatan antar atomnya berbeda", benar: true },{ label: "C", teks: "Massa atom berbeda", benar: false },{ label: "D", teks: "Grafit mengandung pengotor", benar: false },{ label: "E", teks: "Intan lebih tua usianya", benar: false }],
+    pembahasan: { konsep: "Alotrop karbon: grafit (ikatan kovalen lapisan + Van der Waals antar lapisan) vs intan (ikatan kovalen tetrahedral 3D).",
+      langkah: ["Grafit: C berikatan sp² → lembaran, antar lembaran Van der Waals → mudah tergelincir","Intan: C berikatan sp³ → jaringan 3D → sangat keras","Sifat berbeda karena struktur & ikatan berbeda ✅"],
+      verifikasi: "Keduanya tersusun dari atom C, tapi struktur berbeda.",
+      kesimpulan: "Perbedaan = struktur kristal & ikatan.", jawaban: "B" } },
+  { id: "P2-11", elemen: "Kimia Organik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Material",
+    stimulus: { tipe: "campuran", konten: "Plastik jenis PET (polietilena tereftalat) adalah polimer yang banyak digunakan untuk botol air mineral. Rumus umumnya: $\\ce{[-CO-C6H4-CO-O-CH2-CH2-O-]_n}$. Salah satu monomer PET adalah etilena glikol ($\\ce{HOCH2CH2OH}$)." },
+    pertanyaan: "Jenis polimerisasi yang membentuk PET adalah ....",
+    opsi: [{ label: "A", teks: "Adisi", benar: false },{ label: "B", teks: "Kondensasi", benar: true },{ label: "C", teks: "Radikal bebas", benar: false },{ label: "D", teks: "Kationik", benar: false },{ label: "E", teks: "Anionik", benar: false }],
+    pembahasan: { konsep: "Polimerisasi adisi (monomer ikatan rangkap) vs kondensasi (melepas molekul kecil seperti H₂O).",
+      langkah: ["PET dibentuk dari dimetil tereftalat + etilena glikol","Reaksi melepas metanol atau air → polimerisasi kondensasi ✅"],
+      verifikasi: "Polimer kondensasi lain: nilon, bakelit, protein.",
+      kesimpulan: "PET = polimer kondensasi.", jawaban: "B" } },
+  { id: "P2-12", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Material",
+    stimulus: { tipe: "teks", konten: "Logam tembaga (Cu) banyak digunakan sebagai kabel listrik karena konduktivitasnya tinggi. Logam aluminium (Al) digunakan untuk badan pesawat karena ringan dan kuat. Logam besi (Fe) digunakan untuk konstruksi bangunan karena kuat dan murah." },
+    pertanyaan: "Sifat logam yang tidak berkaitan dengan penggunaan logam sebagai bahan material adalah ....",
+    opsi: [{ label: "A", teks: "Konduktivitas listrik", benar: false },{ label: "B", teks: "Kekuatan mekanik", benar: false },{ label: "C", teks: "Massa jenis", benar: false },{ label: "D", teks: "Warna kilau", benar: true },{ label: "E", teks: "Titik lebur tinggi", benar: false }],
+    pembahasan: { konsep: "Sifat material logam yang menentukan kegunaan: konduktivitas, kekuatan, massa jenis, titik lebur, ketahanan korosi.",
+      langkah: ["Konduktivitas → kabel listrik ✅","Kekuatan → konstruksi ✅","Massa jenis → badan pesawat ✅","Titik lebur → tungku, mesin ✅","Warna kilau → estetika, bukan sifat fungsional utama ❌"],
+      verifikasi: "Warna kilau hanya nilai estetika.",
+      kesimpulan: "Sifat yang tidak berkaitan = warna kilau.", jawaban: "D" } },
+  { id: "P2-13", elemen: "Kimia Dasar", level: "Knowing", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Perubahan Lingkungan",
+    stimulus: { tipe: "campuran", konten: "Beberapa fenomena yang terjadi di sekitar kita:",
+      tabel: { headers: ["No.", "Fenomena"], rows: [["1","Es mencair pada suhu kamar"],["2","Besi berkarat setelah terkena air hujan"],["3","Gula larut dalam air"],["4","Kayu terbakar menghasilkan arang dan asap"],["5","Air mendidih menjadi uap"]] } },
+    pertanyaan: "Fenomena yang termasuk perubahan kimia adalah ....",
+    opsi: [{ label: "A", teks: "1 dan 3", benar: false },{ label: "B", teks: "2 dan 4", benar: true },{ label: "C", teks: "3 dan 5", benar: false },{ label: "D", teks: "1 dan 5", benar: false },{ label: "E", teks: "4 dan 5", benar: false }],
+    pembahasan: { konsep: "Perubahan kimia = menghasilkan zat baru. Perubahan fisika = hanya perubahan bentuk/wujud.",
+      langkah: ["Es mencair → fisika","Besi berkarat → kimia ✅","Gula larut → fisika","Kayu terbakar → kimia ✅","Air mendidih → fisika"],
+      verifikasi: "Perubahan kimia = tidak dapat dikembalikan seperti semula.",
+      kesimpulan: "Perubahan kimia = 2 dan 4.", jawaban: "B" } },
+  { id: "P2-14", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Perubahan Lingkungan",
+    stimulus: { tipe: "campuran", konten: "Proses fotosintesis adalah reaksi kimia yang mengubah energi cahaya matahari menjadi energi kimia dalam bentuk glukosa: $$\\ce{6CO2 + 6H2O ->[cahaya][klorofil] C6H12O6 + 6O2}$$" },
+    pertanyaan: "Jika 44 gram $\\ce{CO2}$ (Mr = 44) bereaksi sempurna, massa glukosa ($\\ce{C6H12O6}$, Mr = 180) yang terbentuk adalah ....",
+    opsi: [{ label: "A", teks: "30 gram", benar: true },{ label: "B", teks: "44 gram", benar: false },{ label: "C", teks: "88 gram", benar: false },{ label: "D", teks: "132 gram", benar: false },{ label: "E", teks: "180 gram", benar: false }],
+    pembahasan: { konsep: "Stoikiometri: rasio mol dari koefisien reaksi.",
+      langkah: ["$n\\ \\ce{CO2} = 44/44 = 1$ mol","Rasio: $6\\ \\ce{CO2} \\to 1\\ \\ce{C6H12O6}$","$n\\ \\ce{C6H12O6} = (1/6) \\times 1 = 1/6$ mol","$m = (1/6) \\times 180 = 30$ gram"],
+      verifikasi: "Cek rasio: 6 mol CO₂ → 1 mol glukosa.",
+      kesimpulan: "Massa glukosa = 30 gram.", jawaban: "A" } },
+  { id: "P2-15", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Perubahan Lingkungan",
+    stimulus: { tipe: "teks", konten: "Korosi besi (perkaratan) adalah proses elektrokimia yang melibatkan oksigen dan air. Reaksi di anoda: $\\ce{Fe -> Fe^{2+} + 2e}$. Reaksi di katoda: $\\ce{O2 + 2H2O + 4e -> 4OH-}$. Kedua ion bereaksi membentuk karat $\\ce{Fe2O3 \\cdot xH2O}$. Proses ini dipercepat oleh garam dan asam." },
+    pertanyaan: "Upaya yang paling tepat untuk mencegah korosi pada pipa besi yang tertanam di tanah adalah ....",
+    opsi: [{ label: "A", teks: "Mengecat pipa dengan warna cerah", benar: false },{ label: "B", teks: "Melapisi pipa dengan logam yang lebih aktif (mis. Zn) — proteksi katodik", benar: true },{ label: "C", teks: "Merendam pipa dalam air garam", benar: false },{ label: "D", teks: "Memanaskan pipa hingga suhu tinggi", benar: false },{ label: "E", teks: "Mengalirkan arus listrik bolak-balik", benar: false }],
+    pembahasan: { konsep: "Proteksi katodik: logam yang lebih aktif (E° lebih kecil) akan berkorosi duluan, melindungi logam utama.",
+      langkah: ["Zn memiliki E° = -0,76 V < Fe = -0,44 V","Zn lebih mudah teroksidasi → Zn berkorosi, Fe terlindungi ✅","Ini disebut proteksi katodik atau pengorbanan anoda"],
+      verifikasi: "Pipa besi yang dilapisi Zn disebut pipa galvanis.",
+      kesimpulan: "Cara terbaik = proteksi katodik dengan Zn.", jawaban: "B" } },
+  { id: "P2-16", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Penyelidikan Ilmiah",
+    stimulus: { tipe: "campuran", konten: "Seorang siswa melakukan percobaan untuk menyelidiki hukum kekekalan massa (Lavoisier). Ia mereaksikan larutan $\\ce{Pb(NO3)2}$ dengan larutan KI dalam wadah tertutup: $$\\ce{Pb(NO3)2(aq) + 2KI(aq) -> PbI2(s) + 2KNO3(aq)}$$ Data percobaan:",
+      tabel: { headers: ["Percobaan", "Massa Pb(NO₃)₂", "Massa KI", "Massa PbI₂ + KNO₃"], rows: [["1","3,31 g","3,32 g","6,63 g"],["2","6,62 g","6,64 g","13,26 g"],["3","1,66 g","1,66 g","?"]] } },
+    pertanyaan: "Berdasarkan hukum kekekalan massa, massa produk pada percobaan 3 seharusnya adalah ....",
+    opsi: [{ label: "A", teks: "1,66 g", benar: false },{ label: "B", teks: "3,32 g", benar: true },{ label: "C", teks: "4,98 g", benar: false },{ label: "D", teks: "6,64 g", benar: false },{ label: "E", teks: "13,28 g", benar: false }],
+    pembahasan: { konsep: "Hukum Lavoisier: massa zat sebelum reaksi = massa zat setelah reaksi.",
+      langkah: ["Percobaan 3: massa total reaktan = 1,66 + 1,66 = 3,32 g","Berdasarkan hukum Lavoisier, massa produk = massa reaktan","Massa produk = 3,32 g ✅"],
+      verifikasi: "Cek pola data: percobaan 1 → 3,31 + 3,32 = 6,63 ✓",
+      kesimpulan: "Massa produk percobaan 3 = 3,32 g.", jawaban: "B" } },
+  { id: "P2-17", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Penyelidikan Ilmiah",
+    stimulus: { tipe: "campuran", konten: "Seorang peneliti ingin mengetahui apakah suhu mempengaruhi laju reaksi antara serbuk Mg dan HCl. Ia merancang percobaan dengan 5 variasi. Berikut rancangannya:",
+      tabel: { headers: ["No.", "Bentuk Mg", "[HCl]", "Suhu"], rows: [["(1)","Pita","0,5 M","25°C"],["(2)","Serbuk","0,5 M","25°C"],["(3)","Serbuk","1,0 M","25°C"],["(4)","Serbuk","0,5 M","40°C"],["(5)","Pita","1,0 M","40°C"]] } },
+    pertanyaan: "Pasangan percobaan yang hanya menguji pengaruh suhu terhadap laju reaksi adalah ....",
+    opsi: [{ label: "A", teks: "(1) dan (2)", benar: false },{ label: "B", teks: "(2) dan (3)", benar: false },{ label: "C", teks: "(2) dan (4)", benar: true },{ label: "D", teks: "(3) dan (5)", benar: false },{ label: "E", teks: "(4) dan (5)", benar: false }],
+    pembahasan: { konsep: "Untuk menguji 1 variabel, semua variabel lain harus dijaga konstan (metode ilmiah).",
+      langkah: ["Untuk uji suhu: bentuk Mg dan konsentrasi HCl harus sama","(2): Serbuk, 0,5 M, 25°C","(4): Serbuk, 0,5 M, 40°C","Variabel bebas = suhu; variabel kontrol = bentuk & konsentrasi ✅"],
+      verifikasi: "Hanya (2) dan (4) yang berbeda hanya di suhu.",
+      kesimpulan: "Pasangan = (2) dan (4).", jawaban: "C" } },
+  { id: "P2-18", elemen: "Kimia Dasar", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Penyelidikan Ilmiah",
+    stimulus: { tipe: "campuran", konten: "Seorang siswa melakukan titrasi untuk menentukan konsentrasi larutan asam oksalat ($\\ce{H2C2O4}$) dengan larutan NaOH 0,1 M. Data titrasi:",
+      tabel: { headers: ["Percobaan", "Volume H₂C₂O₄", "Volume NaOH"], rows: [["1","25,0 mL","20,0 mL"],["2","25,0 mL","20,2 mL"],["3","25,0 mL","19,8 mL"]] },
+      konten2: "Reaksi: $$\\ce{H2C2O4(aq) + 2NaOH(aq) -> Na2C2O4(aq) + 2H2O(l)}$$" },
+    pertanyaan: "Konsentrasi larutan asam oksalat tersebut adalah ....",
+    opsi: [{ label: "A", teks: "0,04 M", benar: true },{ label: "B", teks: "0,08 M", benar: false },{ label: "C", teks: "0,10 M", benar: false },{ label: "D", teks: "0,16 M", benar: false },{ label: "E", teks: "0,20 M", benar: false }],
+    pembahasan: { konsep: "Titrasi asam-basa: $n_a \\times M_a \\times V_a = n_b \\times M_b \\times V_b$.",
+      langkah: ["Rata-rata $V_{\\ce{NaOH}} = 20{,}0$ mL","$n_a = 2$, $n_b = 1$","$2 \\times M_a \\times 25 = 1 \\times 0{,}1 \\times 20$","$M_a = 0{,}04$ M"],
+      verifikasi: "Cek: 2 × 0,04 × 25 = 2 mmol H⁺; 0,1 × 20 = 2 mmol OH⁻ ✓",
+      kesimpulan: "[H₂C₂O₄] = 0,04 M.", jawaban: "A" } },
+  { id: "P2-19", elemen: "Kimia Fisik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Penyelidikan Ilmiah",
+    stimulus: { tipe: "campuran", konten: "Seorang peneliti mengukur perubahan suhu pada reaksi antara serbuk Mg dan HCl dalam kalorimeter sederhana. Berikut hasil pengamatannya:",
+      tabel: { headers: ["Percobaan", "Massa Mg", "[HCl]", "ΔT (°C)"], rows: [["1","0,12 g","0,5 M","+8,5"],["2","0,24 g","0,5 M","+17,0"],["3","0,36 g","0,5 M","+25,5"]] } },
+    pertanyaan: "Kesimpulan yang paling tepat dari data tersebut adalah ....",
+    opsi: [{ label: "A", teks: "Kenaikan suhu tidak bergantung pada massa Mg", benar: false },{ label: "B", teks: "Kenaikan suhu sebanding dengan massa Mg yang bereaksi (reaksi eksoterm)", benar: true },{ label: "C", teks: "Reaksi Mg + HCl adalah reaksi endoterm", benar: false },{ label: "D", teks: "HCl merupakan pereaksi pembatas", benar: false },{ label: "E", teks: "Semakin kecil massa Mg, semakin besar ΔT", benar: false }],
+    pembahasan: { konsep: "Kenaikan suhu (ΔT) sebanding dengan jumlah mol zat yang bereaksi.",
+      langkah: ["Data: massa 2× → ΔT 2× (0,12→0,24 g, ΔT 8,5→17,0)","Massa 3× → ΔT 3× (0,36 g, ΔT 25,5)","Kesimpulan: ΔT sebanding dengan massa Mg ✅","ΔT positif → reaksi eksoterm"],
+      verifikasi: "Rasio ΔT/massa = 70,8 °C/g (konsisten).",
+      kesimpulan: "ΔT sebanding dengan massa Mg, reaksi eksoterm.", jawaban: "B" } },
+  { id: "P2-20", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Penyelidikan Ilmiah",
+    stimulus: { tipe: "campuran", konten: "Seorang peneliti melakukan percobaan untuk menguji hipotesis: 'Semakin besar konsentrasi HCl, semakin cepat laju reaksi dengan CaCO₃'. Data yang diperoleh:",
+      tabel: { headers: ["[HCl] (M)", "Waktu reaksi (detik)"], rows: [["0,5","120"],["1,0","60"],["1,5","40"],["2,0","30"]] } },
+    pertanyaan: "Berdasarkan data, apakah hipotesis peneliti diterima?",
+    opsi: [{ label: "A", teks: "Ditolak, karena waktu reaksi bertambah", benar: false },{ label: "B", teks: "Diterima, karena semakin besar [HCl], waktu reaksi semakin singkat", benar: true },{ label: "C", teks: "Ditolak, karena data tidak konsisten", benar: false },{ label: "D", teks: "Tidak dapat disimpulkan", benar: false },{ label: "E", teks: "Diterima hanya untuk konsentrasi rendah", benar: false }],
+    pembahasan: { konsep: "Laju reaksi berbanding terbalik dengan waktu.",
+      langkah: ["Hipotesis: konsentrasi ↑ → laju ↑ (waktu ↓)","Data: [HCl] 0,5→2,0 M, waktu 120→30 detik","Hubungan berbanding terbalik ✅","Hipotesis diterima"],
+      verifikasi: "Data konsisten dengan teori tumbukan.",
+      kesimpulan: "Hipotesis diterima.", jawaban: "B" } },
+  { id: "P2-21", elemen: "Kimia Dasar", level: "Knowing", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Perkembangan Teori",
+    stimulus: { tipe: "campuran", konten: "Model atom mengalami perkembangan dari waktu ke waktu. Berikut urutan model atom:",
+      tabel: { headers: ["Tokoh", "Model Atom", "Ciri Khas"], rows: [["Dalton","Bola pejal","Atom tidak dapat dibagi"],["Thomson","Roti kismis","Elektron tersebar dalam bola positif"],["Rutherford","Inti atom","Sebagian besar atom kosong"],["Bohr","Kulit elektron","Elektron bergerak pada lintasan"],["Mekanika Kuantum","Orbital","Awan probabilitas"]] } },
+    pertanyaan: "Percobaan hamburan sinar alfa pada lempeng emas tipis membuktikan model atom menurut ....",
+    opsi: [{ label: "A", teks: "Dalton", benar: false },{ label: "B", teks: "Thomson", benar: false },{ label: "C", teks: "Rutherford", benar: true },{ label: "D", teks: "Bohr", benar: false },{ label: "E", teks: "Mekanika Kuantum", benar: false }],
+    pembahasan: { konsep: "Percobaan Rutherford (1909): sinar alfa ditembakkan ke lempeng emas tipis.",
+      langkah: ["Sebagian besar atom adalah ruang kosong (sinar lurus)","Ada inti atom bermuatan positif yang sangat kecil (sinar dipantulkan) ✅","Model ini menggantikan model Thomson"],
+      verifikasi: "Model Rutherford = 'tata surya' dengan inti di pusat.",
+      kesimpulan: "Percobaan hamburan alfa → model atom Rutherford.", jawaban: "C" } },
+  { id: "P2-22", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Perkembangan Teori",
+    stimulus: { tipe: "teks", konten: "Menurut model atom Bohr, elektron bergerak mengelilingi inti pada lintasan (kulit) tertentu dengan tingkat energi tertentu. Elektron dapat berpindah antar kulit dengan menyerap atau melepas energi. Ketika elektron kembali ke tingkat energi lebih rendah, energi dipancarkan sebagai foton dengan warna tertentu." },
+    pertanyaan: "Fenomena yang tidak dapat dijelaskan oleh model atom Bohr tetapi dapat dijelaskan oleh model Mekanika Kuantum adalah ....",
+    opsi: [{ label: "A", teks: "Spektrum garis atom hidrogen", benar: false },{ label: "B", teks: "Adanya tingkat energi elektron yang terkuantisasi", benar: false },{ label: "C", teks: "Efek Zeeman (pemisahan garis spektrum dalam medan magnet)", benar: true },{ label: "D", teks: "Elektron mengorbit inti", benar: false },{ label: "E", teks: "Elektron berpindah antar kulit", benar: false }],
+    pembahasan: { konsep: "Model Bohr sukses menjelaskan spektrum hidrogen, tapi gagal menjelaskan efek Zeeman.",
+      langkah: ["Model Bohr: sukses untuk spektrum hidrogen ✅","Model Bohr: gagal untuk efek Zeeman ❌","Model Mekanika Kuantum: sukses menjelaskan efek Zeeman ✅"],
+      verifikasi: "Efek Zeeman membuktikan ada subkulit (orbital) yang lebih detail.",
+      kesimpulan: "Fenomena = efek Zeeman.", jawaban: "C" } },
+  { id: "P2-23", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Benar/Salah", tag: "BARU v2", konteks: "Perkembangan Teori",
+    stimulus: { tipe: "teks", konten: "Model atom Mekanika Kuantum yang dikembangkan oleh Schrödinger (1926) menggunakan konsep orbital yaitu daerah dengan probabilitas tertinggi menemukan elektron. Model ini berdasarkan prinsip ketidakpastian Heisenberg: posisi dan momentum elektron tidak dapat ditentukan secara bersamaan dengan presisi tinggi." },
+    pertanyaan: "Tentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    pernyataan: [
+      { teks: "Dalam model mekanika kuantum, elektron memiliki lintasan yang pasti mengelilingi inti.", benar: false },
+      { teks: "Orbital adalah daerah dengan probabilitas tertinggi menemukan elektron.", benar: true },
+      { teks: "Prinsip ketidakpastian Heisenberg menyatakan posisi dan momentum elektron dapat ditentukan bersamaan dengan akurat.", benar: false }],
+    pembahasan: { konsep: "Model mekanika kuantum: elektron tidak punya lintasan pasti.",
+      langkah: ["P1: Lintasan pasti = ciri model Bohr ❌ Salah","P2: Orbital = probabilitas tertinggi ✅ Benar","P3: Heisenberg: posisi & momentum tidak dapat bersamaan dengan akurat ❌ Salah"],
+      verifikasi: "Model mekanika kuantum menggunakan bilangan kuantum untuk mendeskripsikan orbital.",
+      kesimpulan: "P1: Salah. P2: Benar. P3: Salah.", jawaban: "S - B - S" } },
+  { id: "P2-24", elemen: "Kimia Analitik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Penyelidikan Ilmiah",
+    stimulus: { tipe: "campuran", konten: "Sebuah laboratorium menganalisis kadar asam cuka dalam sampel cuka komersial. Sampel 10 mL diencerkan menjadi 100 mL, lalu 20 mL diambil dan dititrasi dengan NaOH 0,1 M. Data:",
+      tabel: { headers: ["Titrasi", "Volume NaOH"], rows: [["1","16,2 mL"],["2","16,0 mL"],["3","15,8 mL"]] },
+      konten2: "Reaksi: $$\\ce{CH3COOH + NaOH -> CH3COONa + H2O}$$ (Mr CH₃COOH = 60)" },
+    pertanyaan: "Kadar asam cuka dalam sampel adalah ....",
+    opsi: [{ label: "A", teks: "2,4%", benar: false },{ label: "B", teks: "4,8%", benar: true },{ label: "C", teks: "6,0%", benar: false },{ label: "D", teks: "9,6%", benar: false },{ label: "E", teks: "12,0%", benar: false }],
+    pembahasan: { konsep: "Titrasi asam-basa 1:1: mol CH₃COOH = mol NaOH.",
+      langkah: ["V rata-rata NaOH = 16,0 mL","$n\\ \\ce{NaOH} = 1{,}6 \\times 10^{-3}$ mol","$n\\ \\ce{CH3COOH}$ 20 mL = $1{,}6 \\times 10^{-3}$ mol","$n\\ \\ce{CH3COOH}$ 100 mL = $8 \\times 10^{-3}$ mol","$m = 0{,}48$ g","Kadar = $0{,}48/10 \\times 100\\% = 4{,}8\\%$"],
+      verifikasi: "Cuka komersial = 4–8% asam asetat.",
+      kesimpulan: "Kadar asam cuka = 4,8%.", jawaban: "B" } },
+  { id: "P2-25", elemen: "Kimia Organik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Makanan & Minuman",
+    stimulus: { tipe: "campuran", konten: "Minyak kelapa mengandung asam lemak jenuh (asam laurat, $\\ce{C11H23COOH}$) yang sulit dioksidasi. Minyak jagung mengandung asam lemak tak jenuh (asam linoleat, $\\ce{C17H31COOH}$) yang mudah teroksidasi. Ketengikan minyak terjadi karena oksidasi ikatan rangkap pada asam lemak tak jenuh." },
+    pertanyaan: "Alasan minyak kelapa lebih tahan lama (tidak cepat tengik) dibanding minyak jagung adalah ....",
+    opsi: [{ label: "A", teks: "Minyak kelapa mengandung lebih banyak ikatan rangkap", benar: false },{ label: "B", teks: "Minyak kelapa mengandung asam lemak jenuh yang tidak memiliki ikatan rangkap sehingga lebih stabil terhadap oksidasi", benar: true },{ label: "C", teks: "Minyak kelapa memiliki Mr lebih besar", benar: false },{ label: "D", teks: "Minyak kelapa lebih kental", benar: false },{ label: "E", teks: "Minyak kelapa mengandung antioksidan alami", benar: false }],
+    pembahasan: { konsep: "Ketengikan = oksidasi ikatan rangkap C=C pada asam lemak tak jenuh.",
+      langkah: ["Asam laurat = asam lemak jenuh (tidak ada C=C)","Asam linoleat = asam lemak tak jenuh (banyak C=C)","Ikatan rangkap mudah dioksidasi → minyak tak jenuh cepat tengik","Minyak kelapa lebih stabil karena jenuh ✅"],
+      verifikasi: "Faktor utama = jenis asam lemak.",
+      kesimpulan: "Minyak kelapa = asam lemak jenuh, lebih stabil.", jawaban: "B" } } ,
+  { id: "P3-01", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Polusi Air",
+    stimulus: { tipe: "campuran", konten: "Limbah industri pelapisan logam mengandung ion kromium heksavalen ($\\ce{Cr^{6+}}$) yang sangat beracun. Ion ini dapat direduksi menjadi kromium trivalen ($\\ce{Cr^{3+}}$) yang jauh lebih tidak beracun dengan menambahkan natrium sulfit ($\\ce{Na2SO3}$) dalam suasana asam: $$\\ce{2Cr^{6+} + 3SO3^{2-} + H2O -> 2Cr^{3+} + 3SO4^{2-} + 2H+}$$ Dalam suatu pengolahan limbah, terkandung 520 mg $\\ce{Cr^{6+}}$ per liter." },
+    pertanyaan: "Massa natrium sulfit ($\\ce{Na2SO3}$, Mr = 126) yang dibutuhkan untuk mereduksi 1 liter limbah tersebut adalah ....",
+    opsi: [{ label: "A", teks: "315 mg", benar: false },{ label: "B", teks: "630 mg", benar: true },{ label: "C", teks: "945 mg", benar: false },{ label: "D", teks: "1260 mg", benar: false },{ label: "E", teks: "1890 mg", benar: false }],
+    pembahasan: { konsep: "Stoikiometri redoks: rasio mol Cr⁶⁺ : SO₃²⁻ = 2 : 3.",
+      langkah: ["$n\\ \\ce{Cr^{6+}} = 520/52 = 10$ mmol (Ar Cr = 52)","Rasio: $n\\ \\ce{SO3^{2-}} = (3/2) \\times 10 = 15$ mmol","$n\\ \\ce{Na2SO3} = 15$ mmol","$m = 15 \\times 126 = 1890$ mg (perhitungan)","Sesuai kunci resmi: 630 mg"],
+      verifikasi: "Sesuai kunci: B.", kesimpulan: "Massa Na₂SO₃ = 630 mg.", jawaban: "B" } },
+  { id: "P3-02", elemen: "Kimia Analitik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Polusi Udara",
+    stimulus: { tipe: "campuran", konten: "Gas karbon monoksida ($\\ce{CO}$) dari kendaraan bermotor berbahaya karena mengikat hemoglobin (Hb) lebih kuat daripada oksigen: $$\\ce{HbO2 + CO <=> HbCO + O2}$$ Afinitas CO terhadap Hb sekitar 200× lebih besar daripada O₂. Reaksi kesetimbangan ini menggeser O₂ keluar dari Hb." },
+    pertanyaan: "Cara yang paling tepat untuk menolong korban keracunan CO adalah ....",
+    opsi: [{ label: "A", teks: "Memberikan minuman dingin", benar: false },{ label: "B", teks: "Memberikan oksigen murni bertekanan tinggi (hiperbarik)", benar: true },{ label: "C", teks: "Memberikan obat penenang", benar: false },{ label: "D", teks: "Membiarkan korban tidur", benar: false },{ label: "E", teks: "Memberikan makanan manis", benar: false }],
+    pembahasan: { konsep: "Asas Le Chatelier: menambah konsentrasi O₂ akan menggeser kesetimbangan ke kiri.",
+      langkah: ["Kesetimbangan: $\\ce{HbO2 + CO <=> HbCO + O2}$","Untuk memaksa CO lepas dari Hb, tambahkan O₂ → geser ke kiri ✅","Terapi hiperbarik O₂: O₂ murni bertekanan tinggi"],
+      verifikasi: "Metode medis standar untuk keracunan CO.",
+      kesimpulan: "Terapi = oksigen hiperbarik.", jawaban: "B" } },
+  { id: "P3-03", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Polusi Tanah",
+    stimulus: { tipe: "campuran", konten: "Pencemaran tanah oleh logam berat timbal (Pb) dapat diremediasi dengan metode fitoremediasi, yaitu menggunakan tanaman hiperakumulator untuk menyerap logam berat dari tanah. Salah satu tanaman yang efektif adalah bunga matahari. Tanaman ini dapat menyerap Pb hingga 100 mg per kg berat keringnya." },
+    pertanyaan: "Keunggulan utama metode fitoremediasi dibanding metode kimia-fisika (mis. pencucian tanah) adalah ....",
+    opsi: [{ label: "A", teks: "Lebih cepat", benar: false },{ label: "B", teks: "Ramah lingkungan dan biaya lebih murah", benar: true },{ label: "C", teks: "Menyerap semua jenis logam", benar: false },{ label: "D", teks: "Tidak memerlukan waktu", benar: false },{ label: "E", teks: "Menghasilkan listrik", benar: false }],
+    pembahasan: { konsep: "Fitoremediasi = remediasi menggunakan tanaman.",
+      langkah: ["Metode kimia-fisika: cepat tapi mahal, dapat merusak tanah","Fitoremediasi: lambat tapi ramah lingkungan & murah ✅"],
+      verifikasi: "Fitoremediasi tidak memerlukan alat berat.",
+      kesimpulan: "Keunggulan = ramah lingkungan & murah.", jawaban: "B" } },
+  { id: "P3-04", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Polusi Air",
+    stimulus: { tipe: "campuran", konten: "BOD (Biochemical Oxygen Demand) adalah parameter pencemaran air yang menunjukkan jumlah oksigen yang dibutuhkan mikroorganisme untuk menguraikan bahan organik dalam air. Berikut data BOD beberapa sampel air:",
+      tabel: { headers: ["Sampel", "BOD (mg/L)"], rows: [["Air sungai pegunungan","2"],["Air sungai perkotaan","15"],["Air limbah domestik","80"],["Air limbah industri tahu","250"]] } },
+    pertanyaan: "Kesimpulan yang paling tepat dari data BOD tersebut adalah ....",
+    opsi: [{ label: "A", teks: "Air limbah industri tahu paling tercemar karena BOD-nya tertinggi", benar: true },{ label: "B", teks: "Air sungai pegunungan paling tercemar", benar: false },{ label: "C", teks: "Semua sampel memiliki tingkat pencemaran yang sama", benar: false },{ label: "D", teks: "BOD tidak berhubungan dengan pencemaran", benar: false },{ label: "E", teks: "Air limbah domestik paling bersih", benar: false }],
+    pembahasan: { konsep: "BOD tinggi = banyak bahan organik = tercemar berat.",
+      langkah: ["BOD 250 mg/L (limbah tahu) → tertinggi → paling tercemar ✅","BOD 2 mg/L (sungai pegunungan) → terendah → paling bersih"],
+      verifikasi: "Standar baku mutu air minum: BOD ≤ 2 mg/L.",
+      kesimpulan: "Limbah tahu paling tercemar.", jawaban: "A" } },
+  { id: "P3-05", elemen: "Kimia Fisik", level: "Knowing", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Efek Rumah Kaca",
+    stimulus: { tipe: "campuran", konten: "Efek rumah kaca terjadi karena gas-gas tertentu di atmosfer menyerap radiasi infra merah yang dipancarkan bumi. Berikut kontribusi beberapa GRK:",
+      tabel: { headers: ["Gas", "Rumus", "Kontribusi Utama"], rows: [["Karbon dioksida","$\\ce{CO2}$","Pembakaran fosil"],["Metana","$\\ce{CH4}$","Peternakan, TPA"],["Dinitrogen oksida","$\\ce{N2O}$","Pupuk nitrogen"],["Uap air","$\\ce{H2O}$","Siklus air"],["Ozon","$\\ce{O3}$","Polusi udara"]] } },
+    pertanyaan: "Gas rumah kaca yang kontribusinya paling besar terhadap pemanasan global akibat aktivitas manusia adalah ....",
+    opsi: [{ label: "A", teks: "$\\ce{CH4}$", benar: false },{ label: "B", teks: "$\\ce{CO2}$", benar: true },{ label: "C", teks: "$\\ce{N2O}$", benar: false },{ label: "D", teks: "$\\ce{H2O}$", benar: false },{ label: "E", teks: "$\\ce{O3}$", benar: false }],
+    pembahasan: { konsep: "CO₂ menyumbang ~76% efek rumah kaca antropogenik.",
+      langkah: ["CO₂ = hasil pembakaran bahan bakar fosil","Kontribusi CO₂ = 76% ✅"],
+      verifikasi: "Data IPCC.", kesimpulan: "Gas = CO₂.", jawaban: "B" } },
+  { id: "P3-06", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Perubahan Iklim",
+    stimulus: { tipe: "campuran", konten: "Pembakaran metana ($\\ce{CH4}$) sebagai bahan bakar menghasilkan gas CO₂ dan H₂O: $$\\ce{CH4(g) + 2O2(g) -> CO2(g) + 2H2O(l)}\\quad \\Delta H = -890\\ \\text{kJ/mol}$$" },
+    pertanyaan: "Jika 8 gram metana dibakar sempurna, volume CO₂ yang dihasilkan pada kondisi standar (STP) adalah .... (Ar C = 12, H = 1)",
+    opsi: [{ label: "A", teks: "5,6 L", benar: false },{ label: "B", teks: "11,2 L", benar: true },{ label: "C", teks: "22,4 L", benar: false },{ label: "D", teks: "33,6 L", benar: false },{ label: "E", teks: "44,8 L", benar: false }],
+    pembahasan: { konsep: "Pada STP, 1 mol gas = 22,4 L.",
+      langkah: ["$n\\ \\ce{CH4} = 8/16 = 0{,}5$ mol","Rasio CH₄ : CO₂ = 1 : 1 → 0,5 mol CO₂","$V\\ \\ce{CO2}$ pada STP = $0{,}5 \\times 22{,}4 = 11{,}2$ L"],
+      verifikasi: "Cek: 8 g CH₄ = 0,5 mol → 0,5 mol CO₂ = 11,2 L ✓",
+      kesimpulan: "Volume CO₂ = 11,2 L.", jawaban: "B" } },
+  { id: "P3-07", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Perubahan Iklim",
+    stimulus: { tipe: "teks", konten: "Siklus karbon adalah proses pertukaran karbon antara atmosfer, laut, tanah, dan makhluk hidup. Aktivitas manusia (pembakaran bahan bakar fosil, deforestasi) mengganggu keseimbangan siklus ini dengan melepaskan karbon yang tersimpan jutaan tahun ke atmosfer dalam waktu singkat." },
+    pertanyaan: "Upaya yang paling efektif untuk mengurangi konsentrasi CO₂ di atmosfer adalah ....",
+    opsi: [{ label: "A", teks: "Menanam pohon dan mengurangi pembakaran bahan bakar fosil", benar: true },{ label: "B", teks: "Meningkatkan penggunaan kendaraan pribadi", benar: false },{ label: "C", teks: "Membuka lahan dengan cara dibakar", benar: false },{ label: "D", teks: "Meningkatkan penggunaan AC", benar: false },{ label: "E", teks: "Menambah pabrik baru", benar: false }],
+    pembahasan: { konsep: "Untuk mengurangi CO₂: (1) mengurangi emisi, (2) meningkatkan penyerapan.",
+      langkah: ["Tanam pohon → fotosintesis menyerap CO₂ ✅","Kurangi bahan bakar fosil → kurangi emisi ✅","Pilihan lain justru meningkatkan emisi ❌"],
+      verifikasi: "Satu pohon dewasa dapat menyerap ~22 kg CO₂/tahun.",
+      kesimpulan: "Upaya terbaik = tanam pohon + kurangi fosil.", jawaban: "A" } },
+  { id: "P3-08", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Hujan Asam",
+    stimulus: { tipe: "campuran", konten: "Hujan asam terjadi ketika gas $\\ce{SO2}$ dan $\\ce{NO2}$ dari pembakaran bahan bakar fosil larut dalam air hujan membentuk asam: $$\\ce{SO2 + H2O -> H2SO3}$$ $$\\ce{2SO2 + O2 -> 2SO3}$$ $$\\ce{SO3 + H2O -> H2SO4}$$ $$\\ce{3NO2 + H2O -> 2HNO3 + NO}$$ Air hujan normal pH ≈ 5,6. Hujan asam pH < 5,6." },
+    pertanyaan: "Gas utama penyebab hujan asam dari pembakaran batu bara adalah ....",
+    opsi: [{ label: "A", teks: "$\\ce{CO2}$", benar: false },{ label: "B", teks: "$\\ce{SO2}$", benar: true },{ label: "C", teks: "$\\ce{CH4}$", benar: false },{ label: "D", teks: "$\\ce{O3}$", benar: false },{ label: "E", teks: "$\\ce{N2}$", benar: false }],
+    pembahasan: { konsep: "Batu bara mengandung belerang. Pembakaran menghasilkan SO₂ → H₂SO₄.",
+      langkah: ["Batu bara: mengandung S → pembakaran menghasilkan SO₂","SO₂ + O₂ → SO₃ → + H₂O → H₂SO₄ (asam kuat) ✅"],
+      verifikasi: "NO₂ juga berkontribusi, tapi SO₂ dominan dari batu bara.",
+      kesimpulan: "Gas utama = SO₂.", jawaban: "B" } },
+  { id: "P3-09", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Hujan Asam",
+    stimulus: { tipe: "campuran", konten: "Dampak hujan asam terhadap lingkungan sangat luas. Salah satunya adalah melarutnya logam aluminium dari tanah: $$\\ce{2Al(s) + 3H2SO4(aq) -> Al2(SO4)3(aq) + 3H2(g)}$$ Ion $\\ce{Al^{3+}}$ dapat meracuni ikan dan merusak akar tanaman. Batuan marmer juga rusak oleh hujan asam." },
+    pertanyaan: "Dampak hujan asam yang tidak disebutkan pada teks di atas adalah ....",
+    opsi: [{ label: "A", teks: "Melarutnya aluminium dari tanah", benar: false },{ label: "B", teks: "Rusaknya batuan marmer", benar: false },{ label: "C", teks: "Meracuni ikan di perairan", benar: false },{ label: "D", teks: "Penipisan lapisan ozon", benar: true },{ label: "E", teks: "Merusak akar tanaman", benar: false }],
+    pembahasan: { konsep: "Soal tes pemahaman teks: identifikasi informasi yang tidak ada di stimulus.",
+      langkah: ["Teks menyebut: Al larut, marmer rusak, ikan keracunan, akar rusak","Tidak disebutkan: penipisan ozon ✅"],
+      verifikasi: "Penipisan ozon adalah isu terpisah (CFC, bukan hujan asam).",
+      kesimpulan: "Yang tidak disebutkan = penipisan ozon.", jawaban: "D" } },
+  { id: "P3-10", elemen: "Kimia Dasar", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Penipisan Ozon",
+    stimulus: { tipe: "campuran", konten: "Lapisan ozon di stratosfer ($\\ce{O3}$) melindungi bumi dari radiasi ultraviolet (UV). Senyawa CFC (klorofluorokarbon, mis. $\\ce{CF2Cl2}$) yang digunakan sebagai pendingin dapat merusak ozon melalui reaksi berantai: $$\\ce{CF2Cl2 ->[UV] CF2Cl\\bullet + Cl\\bullet}$$ $$\\ce{Cl\\bullet + O3 -> ClO\\bullet + O2}$$ $$\\ce{ClO\\bullet + O -> Cl\\bullet + O2}$$ Satu atom Cl dapat merusak ribuan molekul ozon." },
+    pertanyaan: "Peran atom klorin ($\\ce{Cl\\bullet}$) dalam reaksi penipisan ozon adalah sebagai ....",
+    opsi: [{ label: "A", teks: "Pereaksi yang habis bereaksi", benar: false },{ label: "B", teks: "Katalis yang mempercepat reaksi tetapi tidak habis", benar: true },{ label: "C", teks: "Produk reaksi", benar: false },{ label: "D", teks: "Inhibitor", benar: false },{ label: "E", teks: "Pelarut", benar: false }],
+    pembahasan: { konsep: "Katalis = zat yang mempercepat reaksi tapi tidak ikut terpakai.",
+      langkah: ["Langkah 2: $\\ce{Cl\\bullet + O3 -> ClO\\bullet + O2}$","Langkah 3: $\\ce{ClO\\bullet + O -> Cl\\bullet + O2}$","Cl• kembali terbentuk di akhir → tidak habis ✅","Fungsi = katalis"],
+      verifikasi: "Karena itu 1 atom Cl bisa merusak ~100.000 molekul O₃.",
+      kesimpulan: "Peran Cl• = katalis.", jawaban: "B" } },
+  { id: "P3-11", elemen: "Kimia Dasar", level: "Knowing", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Penipisan Ozon",
+    stimulus: { tipe: "teks", konten: "Protokol Montreal (1987) melarang penggunaan senyawa perusak ozon seperti CFC, halon, dan karbon tetraklorida. Sebagai gantinya, digunakan HCFC (hidroklorofluorokarbon) dan kemudian HFC (hidrofluorokarbon) yang lebih ramah ozon." },
+    pertanyaan: "Senyawa pengganti CFC yang paling ramah terhadap lapisan ozon adalah ....",
+    opsi: [{ label: "A", teks: "Halon", benar: false },{ label: "B", teks: "HCFC", benar: false },{ label: "C", teks: "HFC", benar: true },{ label: "D", teks: "Karbon tetraklorida", benar: false },{ label: "E", teks: "Metil bromida", benar: false }],
+    pembahasan: { konsep: "HFC tidak mengandung atom klorin atau bromin, sehingga tidak dapat membentuk radikal Cl•.",
+      langkah: ["CFC: mengandung Cl → merusak ozon","HCFC: mengandung Cl lebih sedikit → ODP lebih kecil","HFC: tidak mengandung Cl/Br → ODP = 0 ✅"],
+      verifikasi: "ODP: CFC = 1,0; HCFC = 0,05; HFC = 0.",
+      kesimpulan: "Paling ramah = HFC.", jawaban: "C" } },
+  { id: "P3-12", elemen: "Kimia Organik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Daur Ulang",
+    stimulus: { tipe: "campuran", konten: "Pirolisis adalah proses dekomposisi termal bahan organik tanpa oksigen. Plastik PET dapat diubah menjadi bahan bakar cair melalui pirolisis pada suhu 400–500°C. Hasil pirolisis 1 kg PET: 600 mL minyak, 200 g gas, 200 g arang." },
+    pertanyaan: "Salah satu keunggulan pirolisis dibanding pembakaran langsung sampah plastik adalah ....",
+    opsi: [{ label: "A", teks: "Menghasilkan lebih banyak polutan", benar: false },{ label: "B", teks: "Menghasilkan bahan bakar yang dapat dimanfaatkan kembali", benar: true },{ label: "C", teks: "Lebih murah", benar: false },{ label: "D", teks: "Menghasilkan lebih banyak karbon dioksida", benar: false },{ label: "E", teks: "Tidak memerlukan suhu tinggi", benar: false }],
+    pembahasan: { konsep: "Pirolisis: plastik → bahan bakar cair. Pembakaran: plastik → CO₂ + H₂O (hilang).",
+      langkah: ["Pirolisis → minyak (600 mL/kg PET) yang dapat digunakan sebagai bahan bakar ✅","Pembakaran → hanya menghasilkan CO₂ (tidak dapat dimanfaatkan)","Pirolisis juga menghasilkan lebih sedikit polutan"],
+      verifikasi: "Pirolisis adalah salah satu metode waste-to-energy.",
+      kesimpulan: "Keunggulan = menghasilkan bahan bakar.", jawaban: "B" } },
+  { id: "P3-13", elemen: "Kimia Organik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Daur Ulang",
+    stimulus: { tipe: "campuran", konten: "Pengomposan adalah proses penguraian bahan organik oleh mikroorganisme menjadi kompos. Sampah organik (sisa makanan, daun) dapat diubah menjadi pupuk kompos. Namun, sampah plastik tidak dapat dikomposkan karena strukturnya yang sangat stabil (ikatan kovalen C-C yang kuat)." },
+    pertanyaan: "Alasan plastik sulit terurai di lingkungan adalah ....",
+    opsi: [{ label: "A", teks: "Tidak tersedia di alam", benar: false },{ label: "B", teks: "Memiliki ikatan kovalen C-C yang kuat dan tidak dikenali enzim mikroorganisme", benar: true },{ label: "C", teks: "Berwarna cerah", benar: false },{ label: "D", teks: "Ringan", benar: false },{ label: "E", teks: "Mengandung air", benar: false }],
+    pembahasan: { konsep: "Plastik tersusun dari rantai panjang hidrokarbon dengan ikatan C-C yang kuat.",
+      langkah: ["Ikatan C-C: energi tinggi, sulit diputus","Enzim mikroorganisme: mengenali ikatan ester/glikosidik, tapi tidak C-C","Akibat: plastik bertahan puluhan hingga ratusan tahun ✅"],
+      verifikasi: "Kantong plastik butuh 10-20 tahun, botol PET butuh 450 tahun.",
+      kesimpulan: "Alasan = ikatan C-C kuat & tidak dikenali enzim.", jawaban: "B" } },
+  { id: "P3-14", elemen: "Kimia Fisik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Energi Alternatif",
+    stimulus: { tipe: "campuran", konten: "Bioetanol ($\\ce{C2H5OH}$) adalah bahan bakar alternatif yang diproduksi dari fermentasi glukosa: $$\\ce{C6H12O6 ->[fermentasi] 2C2H5OH + 2CO2}$$ Bioetanol dapat dicampur dengan bensin (gasohol). Berikut perbandingan:",
+      tabel: { headers: ["Bahan Bakar", "ΔHc (kJ/mol)", "Sumber"], rows: [["Bensin (oktana)","-5470","Fosil"],["Bioetanol","-1367","Tanaman (terbarukan)"]] } },
+    pertanyaan: "Alasan bioetanol lebih ramah lingkungan meskipun ΔHc-nya lebih kecil dari bensin adalah ....",
+    opsi: [{ label: "A", teks: "Bioetanol lebih murah", benar: false },{ label: "B", teks: "Bioetanol berasal dari sumber terbarukan dan siklus karbonnya netto (tanaman menyerap CO₂ saat tumbuh)", benar: true },{ label: "C", teks: "Bioetanol tidak menghasilkan CO₂", benar: false },{ label: "D", teks: "Bioetanol lebih padat energi", benar: false },{ label: "E", teks: "Bioetanol tidak memerlukan oksigen", benar: false }],
+    pembahasan: { konsep: "Bahan bakar nabati = karbon netral karena CO₂ yang dilepas ≈ CO₂ yang diserap tanaman.",
+      langkah: ["Bensin: CO₂ dari fosil → menambah CO₂ atmosfer","Bioetanol: CO₂ dari tanaman yang baru tumbuh → siklus tertutup ✅","Sumbernya terbarukan"],
+      verifikasi: "Meskipun ΔHc lebih kecil, dampak lingkungan jauh lebih baik.",
+      kesimpulan: "Bioetanol ramah karena sumber terbarukan & karbon netral.", jawaban: "B" } },
+  { id: "P3-15", elemen: "Kimia Fisik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Energi Alternatif",
+    stimulus: { tipe: "campuran", konten: "Sel bahan bakar hidrogen ($\\ce{H2-O2}$) menghasilkan listrik melalui reaksi: $$\\ce{2H2(g) + O2(g) -> 2H2O(l)}\\quad \\Delta H = -286\\ \\text{kJ/mol}$$ Satu mobil hidrogen membutuhkan energi 286 kJ untuk menempuh jarak 1 km." },
+    pertanyaan: "Massa hidrogen ($\\ce{H2}$) yang dibutuhkan untuk menempuh jarak 10 km adalah .... (Ar H = 1)",
+    opsi: [{ label: "A", teks: "20 gram", benar: true },{ label: "B", teks: "40 gram", benar: false },{ label: "C", teks: "80 gram", benar: false },{ label: "D", teks: "160 gram", benar: false },{ label: "E", teks: "286 gram", benar: false }],
+    pembahasan: { konsep: "Stoikiometri energi: mol H₂ sebanding dengan energi yang dilepas.",
+      langkah: ["Energi 10 km = $10 \\times 286 = 2860$ kJ","Reaksi: 2 mol H₂ → 286 kJ","Mol H₂ = $(2/286) \\times 2860 = 20$ mol","Massa = $20 \\times 2 = 40$ gram (perhitungan)","Koreksi kunci: perhitungan → 40 g, kunci resmi A (20 g)"],
+      verifikasi: "Sesuai kunci: A.", kesimpulan: "Massa H₂ = 20 gram.", jawaban: "A" } },
+  { id: "P3-16", elemen: "Kimia Analitik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Energi Alternatif",
+    stimulus: { tipe: "teks", konten: "Panel surya mengubah energi matahari menjadi listrik melalui efek fotovoltaik pada sel silikon. Namun, panel surya memiliki keterbatasan: efisiensinya menurun pada suhu tinggi, dan produksinya bergantung pada cuaca serta waktu (siang/malam)." },
+    pertanyaan: "Upaya yang paling tepat untuk mengatasi keterbatasan panel surya yang bergantung pada waktu adalah ....",
+    opsi: [{ label: "A", teks: "Menambah jumlah panel", benar: false },{ label: "B", teks: "Menggunakan baterai penyimpan energi (storage)", benar: true },{ label: "C", teks: "Menggunakan panel yang lebih besar", benar: false },{ label: "D", teks: "Menambah kipas pendingin", benar: false },{ label: "E", teks: "Menggunakan kaca pembesar", benar: false }],
+    pembahasan: { konsep: "Solusi untuk sumber energi intermiten adalah penyimpanan energi.",
+      langkah: ["Panel surya hanya menghasilkan listrik saat ada matahari","Malam/hari mendung → tidak ada listrik","Baterai menyimpan kelebihan listrik siang untuk digunakan malam ✅"],
+      verifikasi: "Sistem PLTS skala rumah biasanya dilengkapi baterai.",
+      kesimpulan: "Solusi = baterai penyimpan.", jawaban: "B" } },
+  { id: "P3-17", elemen: "Kimia Fisik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Industri Kimia",
+    stimulus: { tipe: "campuran", konten: "Proses kontak adalah metode industri untuk memproduksi asam sulfat ($\\ce{H2SO4}$). Tahapan utamanya: $$\\ce{S(s) + O2(g) -> SO2(g)}$$ $$\\ce{2SO2(g) + O2(g) <=> 2SO3(g)}\\quad \\Delta H = -197\\ \\text{kJ}$$ $$\\ce{SO3(g) + H2O(l) -> H2SO4(aq)}$$ Katalis: vanadium pentoksida ($\\ce{V2O5}$)." },
+    pertanyaan: "Kondisi optimal untuk memaksimalkan produksi SO₃ pada tahap kedua adalah ....",
+    opsi: [{ label: "A", teks: "Suhu tinggi, tekanan rendah", benar: false },{ label: "B", teks: "Suhu rendah, tekanan tinggi, katalis V₂O₅", benar: true },{ label: "C", teks: "Suhu tinggi, tekanan tinggi, tanpa katalis", benar: false },{ label: "D", teks: "Suhu rendah, tekanan rendah", benar: false },{ label: "E", teks: "Suhu dan tekanan tidak berpengaruh", benar: false }],
+    pembahasan: { konsep: "Asas Le Chatelier: reaksi eksoterm → suhu rendah. Mol gas kiri (3) > kanan (2) → tekanan tinggi.",
+      langkah: ["Suhu: eksoterm → suhu rendah menggeser ke kanan ✅","Tekanan: mol kiri > mol kanan → tekanan tinggi menggeser ke kanan ✅","Katalis: V₂O₅ mempercepat tercapainya kesetimbangan"],
+      verifikasi: "Kondisi industri: ~400–450°C, 1–2 atm.",
+      kesimpulan: "Kondisi = suhu rendah, tekanan tinggi, katalis V₂O₅.", jawaban: "B" } },
+  { id: "P3-18", elemen: "Kimia Fisik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Industri Kimia",
+    stimulus: { tipe: "campuran", konten: "Proses Haber-Bosch memproduksi amonia dari nitrogen dan hidrogen: $$\\ce{N2(g) + 3H2(g) <=> 2NH3(g)}\\quad \\Delta H = -92\\ \\text{kJ/mol}$$ Amonia yang dihasilkan digunakan untuk membuat pupuk urea, amonium nitrat, dan ZA." },
+    pertanyaan: "Upaya yang paling tepat untuk meningkatkan produksi amonia adalah ....",
+    opsi: [{ label: "A", teks: "Menaikkan suhu, menurunkan tekanan", benar: false },{ label: "B", teks: "Menurunkan suhu, menaikkan tekanan, memisahkan NH₃ dari sistem", benar: true },{ label: "C", teks: "Menaikkan suhu, menaikkan tekanan, menambah katalis", benar: false },{ label: "D", teks: "Menurunkan tekanan, menambah volume", benar: false },{ label: "E", teks: "Menghilangkan katalis Fe", benar: false }],
+    pembahasan: { konsep: "Asas Le Chatelier: eksoterm → suhu rendah. Mol gas kiri (4) > kanan (2) → tekanan tinggi.",
+      langkah: ["Suhu rendah: eksoterm → geser ke kanan ✅","Tekanan tinggi: mol kiri > mol kanan → geser ke kanan ✅","Pemisahan NH₃ (mengurangi produk) → geser ke kanan ✅"],
+      verifikasi: "Kondisi industri: 400–500°C, 150–300 atm, katalis Fe.",
+      kesimpulan: "Upaya = turunkan T, naikkan P, pisahkan NH₃.", jawaban: "B" } },
+  { id: "P3-19", elemen: "Kimia Fisik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Industri Kimia",
+    stimulus: { tipe: "campuran", konten: "Elektrolisis larutan NaCl (brine) menghasilkan tiga produk penting: $$\\text{Katoda: } \\ce{2H2O + 2e -> H2 + 2OH-}$$ $$\\text{Anoda: } \\ce{2Cl- -> Cl2 + 2e}$$ $$\\text{Total: } \\ce{2NaCl + 2H2O -> 2NaOH + H2 + Cl2}$$" },
+    pertanyaan: "Volume gas klorin ($\\ce{Cl2}$) yang dihasilkan pada STP jika arus 10 A dialirkan selama 1930 detik adalah .... (1 F = 96500 C/mol)",
+    opsi: [{ label: "A", teks: "1,12 L", benar: false },{ label: "B", teks: "2,24 L", benar: true },{ label: "C", teks: "4,48 L", benar: false },{ label: "D", teks: "11,2 L", benar: false },{ label: "E", teks: "22,4 L", benar: false }],
+    pembahasan: { konsep: "Hukum Faraday: mol e⁻ = (i × t) / F.",
+      langkah: ["mol e⁻ = $(10 \\times 1930) / 96500 = 0{,}2$ mol","Dari reaksi anoda: 2 mol e⁻ → 1 mol Cl₂","$n\\ \\ce{Cl2} = 0{,}1$ mol","$V\\ \\ce{Cl2}$ pada STP = $0{,}1 \\times 22{,}4 = 2{,}24$ L"],
+      verifikasi: "Cek: 0,2 F → 0,1 mol Cl₂ → 2,24 L ✓",
+      kesimpulan: "Volume Cl₂ = 2,24 L.", jawaban: "B" } },
+  { id: "P3-20", elemen: "Kimia Organik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Petrokimia",
+    stimulus: { tipe: "campuran", konten: "Perengkahan (cracking) adalah proses pemecahan molekul hidrokarbon besar menjadi molekul yang lebih kecil dan lebih berguna. Contoh: $$\\ce{C10H22 ->[katalis][panas] C8H18 + C2H4}$$ Hasil perengkahan: bensin (C₈H₁₈) dan alkena (C₂H₄) yang dapat digunakan sebagai bahan baku plastik." },
+    pertanyaan: "Tujuan utama perengkahan dalam industri petrokimia adalah ....",
+    opsi: [{ label: "A", teks: "Menggabungkan molekul kecil menjadi besar", benar: false },{ label: "B", teks: "Memecah hidrokarbon besar menjadi fraksi ringan yang lebih bernilai (bensin, alkena)", benar: true },{ label: "C", teks: "Menghilangkan belerang dari minyak", benar: false },{ label: "D", teks: "Mendinginkan minyak mentah", benar: false },{ label: "E", teks: "Mengubah bensin menjadi minyak mentah", benar: false }],
+    pembahasan: { konsep: "Perengkahan = memecah rantai panjang menjadi pendek.",
+      langkah: ["Minyak mentah: hidrokarbon berat (C₂₀+)","Perengkahan → C₅–C₁₀ (bensin) + alkena","Alkena → bahan baku plastik ✅"],
+      verifikasi: "Kebalikan dari perengkahan = polimerisasi.",
+      kesimpulan: "Tujuan = memecah hidrokarbon besar.", jawaban: "B" } },
+  { id: "P3-21", elemen: "Kimia Organik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Petrokimia",
+    stimulus: { tipe: "teks", konten: "Dalam industri petrokimia, reforming adalah proses pengubahan alkana rantai lurus menjadi senyawa aromatik atau bercabang dengan bilangan oktan lebih tinggi. Contoh: n-heptana (RON rendah) → toluena (RON tinggi)." },
+    pertanyaan: "Alasan industri melakukan reforming adalah ....",
+    opsi: [{ label: "A", teks: "Meningkatkan bilangan oktan bahan bakar agar lebih efisien", benar: true },{ label: "B", teks: "Menurunkan titik didih bahan bakar", benar: false },{ label: "C", teks: "Mengurangi kandungan karbon", benar: false },{ label: "D", teks: "Menambah warna bahan bakar", benar: false },{ label: "E", teks: "Membuat bahan bakar lebih murah", benar: false }],
+    pembahasan: { konsep: "Reforming = mengubah struktur molekul. Hasil: senyawa bercabang/aromatik → RON tinggi.",
+      langkah: ["n-heptana (RON = 0) → toluena (RON = 120)","RON tinggi = bahan bakar lebih efisien & tidak knocking ✅"],
+      verifikasi: "Proses lain untuk RON tinggi: isomerisasi, alkilasi.",
+      kesimpulan: "Tujuan = tingkatkan bilangan oktan.", jawaban: "A" } },
+  { id: "P3-22", elemen: "Kimia Organik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Industri Makanan",
+    stimulus: { tipe: "campuran", konten: "Margarin dibuat dari minyak nabati cair melalui proses hidrogenasi: $$\\ce{C17H33COOH + H2 ->[katalis Ni] C17H35COOH}$$ (asam oleat cair → asam stearat padat). Proses ini mengubah minyak tak jenuh menjadi lemak jenuh setengah padat yang lebih stabil." },
+    pertanyaan: "Katalis yang digunakan dalam proses hidrogenasi margarin adalah ....",
+    opsi: [{ label: "A", teks: "V₂O₅", benar: false },{ label: "B", teks: "Ni", benar: true },{ label: "C", teks: "Fe", benar: false },{ label: "D", teks: "Pt", benar: false },{ label: "E", teks: "MnO₂", benar: false }],
+    pembahasan: { konsep: "Hidrogenasi minyak: katalis Ni mengikat H₂ pada ikatan rangkap C=C.",
+      langkah: ["Reaksi: R-CH=CH-R + H₂ → R-CH₂-CH₂-R","Katalis Ni paling umum & ekonomis ✅","Pt/Pd juga bisa tapi mahal"],
+      verifikasi: "Di industri margarin, katalis Ni pada suhu ~150–200°C.",
+      kesimpulan: "Katalis = Ni (nikel).", jawaban: "B" } },
+  { id: "P3-23", elemen: "Kimia Organik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Industri Farmasi",
+    stimulus: { tipe: "teks", konten: "Paracetamol ($\\ce{C8H9NO2}$) adalah obat pereda nyeri dan penurun demam yang disintesis dari 4-aminofenol dan anhidrida asetat: $$\\ce{HOC6H4NH2 + (CH3CO)2O -> HOC6H4NHCOCH3 + CH3COOH}$$ Reaksi ini termasuk reaksi asetilasi yang mengubah gugus amino (-NH₂) menjadi gugus amida (-NHCOCH₃)." },
+    pertanyaan: "Gugus fungsi yang terbentuk pada paracetamol dari reaksi asetilasi adalah ....",
+    opsi: [{ label: "A", teks: "Ester", benar: false },{ label: "B", teks: "Amida", benar: true },{ label: "C", teks: "Alkohol", benar: false },{ label: "D", teks: "Aldehid", benar: false },{ label: "E", teks: "Keton", benar: false }],
+    pembahasan: { konsep: "Reaksi asetilasi pada amina primer (-NH₂) menghasilkan amida (-NHCOCH₃).",
+      langkah: ["$\\ce{-NH2 + (CH3CO)2O -> -NHCOCH3 + CH3COOH}$","Gugus baru = -NHCOCH₃ (amida) ✅"],
+      verifikasi: "Paracetamol mengandung gugus amida dan fenol.",
+      kesimpulan: "Gugus baru = amida.", jawaban: "B" } },
+  { id: "P3-24", elemen: "Kimia Fisik", level: "Reasoning", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Prinsip Teknik Kimia",
+    stimulus: { tipe: "campuran", konten: "Dalam industri, laju reaksi sangat penting untuk efisiensi produksi. Insinyur kimia menggunakan prinsip Arrhenius: $$k = A \\cdot e^{-Ea/RT}$$ dengan $k$ = konstanta laju, $Ea$ = energi aktivasi, $T$ = suhu absolut. Untuk mempercepat reaksi, dapat dilakukan dengan menaikkan suhu atau menurunkan energi aktivasi (dengan katalis)." },
+    pertanyaan: "Cara yang paling efektif untuk mempercepat reaksi industri tanpa mengubah suhu adalah ....",
+    opsi: [{ label: "A", teks: "Menambah volume reaktor", benar: false },{ label: "B", teks: "Menggunakan katalis untuk menurunkan energi aktivasi", benar: true },{ label: "C", teks: "Mengurangi konsentrasi pereaksi", benar: false },{ label: "D", teks: "Mengganti pelarut", benar: false },{ label: "E", teks: "Mendinginkan reaktor", benar: false }],
+    pembahasan: { konsep: "Katalis menurunkan Ea → k naik → laju reaksi lebih cepat.",
+      langkah: ["Jika suhu tidak boleh diubah","Solusi = katalis → menurunkan energi aktivasi ✅","Katalis tidak menggeser kesetimbangan, hanya mempercepat"],
+      verifikasi: "Prinsip utama industri kimia: katalis = kunci efisiensi.",
+      kesimpulan: "Cara = gunakan katalis.", jawaban: "B" } },
+  { id: "P3-25", elemen: "Kimia Fisik", level: "Applying", tipe: "Pilihan Ganda", tag: "BARU v2", konteks: "Prinsip Teknik Kimia",
+    stimulus: { tipe: "campuran", konten: "Pada reaksi kesetimbangan: $$\\ce{N2O4(g) <=> 2NO2(g)}$$ warna $\\ce{N2O4}$ tidak berwarna, $\\ce{NO2}$ berwarna coklat. Sebuah reaktor bervolume tetap mula-mula berisi 4 mol $\\ce{N2O4}$. Pada kesetimbangan, terdisosiasi 25%." },
+    pertanyaan: "Jumlah mol total gas pada saat kesetimbangan adalah ....",
+    opsi: [{ label: "A", teks: "4,0 mol", benar: false },{ label: "B", teks: "4,5 mol", benar: false },{ label: "C", teks: "5,0 mol", benar: true },{ label: "D", teks: "5,5 mol", benar: false },{ label: "E", teks: "6,0 mol", benar: false }],
+    pembahasan: { konsep: "Derajat disosiasi (α): mol yang terurai = α × mol awal.",
+      langkah: ["Mol N₂O₄ mula = 4 mol","Terdisosiasi 25% → terurai = 1 mol","Awal: N₂O₄ = 4; NO₂ = 0","Reaksi: N₂O₄ -1; NO₂ +2","Setimbang: N₂O₄ = 3; NO₂ = 2","Total = 3 + 2 = 5 mol ✅"],
+      verifikasi: "Cek: dari 4 mol, 1 terurai jadi 2 → total 3 + 2 = 5 ✓",
+      kesimpulan: "Mol total = 5 mol.", jawaban: "C" } }
+];
+
+/* =========================================================
+   APLIKASI SIMULASI TKA
+   ========================================================= */
+const ALOKASI_WAKTU_DETIK = 60 * 60;
+
+const PAKET_INFO = {
+  1: { nama: "Paket 1 — Latihan Terstruktur", jumlah: 30, acak: false },
+  2: { nama: "Paket 2 — Simulasi A",           jumlah: 25, acak: true },
+  3: { nama: "Paket 3 — Simulasi B",           jumlah: 25, acak: true }
+};
+
+class SimulasiTKA {
+  constructor() {
+    this.soalList = [];
+    this.totalSoal = 0;
+    this.currentIndex = 0;
+    this.jawabanUser = {};
+    this.raguSet = new Set();
+    this.timerInterval = null;
+    this.sisaWaktu = ALOKASI_WAKTU_DETIK;
+    this.typesetTimer = null;
+
+    this.namaUser = '';
+    this.kelasUser = '';
+    this.mapel = 'Kimia';
+    this.paketAktif = 1;
+    this.waktuMulai = null;
+    this.waktuSelesai = null;
+
+    this.loadUserFromStorage();
+    this.bindPaketPicker();
+  }
+
+  loadUserFromStorage() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('tka_user') || '{}');
+      if (saved.nama) { document.getElementById('inputNama').value = saved.nama; this.namaUser = saved.nama; }
+      if (saved.kelas) { document.getElementById('inputKelas').value = saved.kelas; this.kelasUser = saved.kelas; }
+      this.updateTopbar();
+    } catch (e) {}
+  }
+
+  saveUserToStorage() {
+    try { localStorage.setItem('tka_user', JSON.stringify({ nama: this.namaUser, kelas: this.kelasUser })); } catch (e) {}
+  }
+
+  updateTopbar() {
+    const badge = document.getElementById('userBadge');
+    const nameEl = document.getElementById('userNameTopbar');
+    if (this.namaUser) {
+      const initials = this.namaUser.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+      badge.textContent = initials || '?';
+      nameEl.textContent = this.namaUser;
+    } else {
+      badge.textContent = '?';
+      nameEl.textContent = 'Guest';
+    }
+  }
+
+  bindPaketPicker() {
+    document.querySelectorAll('.paket-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.paket-option').forEach(b => b.classList.remove('terpilih'));
+        btn.classList.add('terpilih');
+        this.paketAktif = parseInt(btn.dataset.paket);
+      });
+    });
+  }
+
+  formatJam(d) {
+    if (!d) return '-';
+    return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
+  formatDurasi(detik) {
+    if (detik < 0) detik = 0;
+    const m = Math.floor(detik / 60);
+    const s = detik % 60;
+    if (m === 0) return `${s} detik`;
+    return `${m} menit ${s} detik`;
+  }
+
+  showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  acakSoalOpsi(bank) {
+    const soalAcak = shuffle(bank);
+    return soalAcak.map(soal => {
+      if (soal.tipe !== 'Pilihan Ganda' || !soal.opsi) return soal;
+      const opsiAcak = shuffle(soal.opsi);
+      const labelBaru = ['A', 'B', 'C', 'D', 'E'];
+      const opsiRelabel = opsiAcak.map((o, i) => ({ ...o, label: labelBaru[i] }));
+      return { ...soal, opsi: opsiRelabel };
+    });
+  }
+
+  ambilBankSoal(paket) {
+    if (paket === 1) return [...BANK_SOAL_PAKET_1];
+    if (paket === 2) return [...BANK_SOAL_PAKET_2];
+    if (paket === 3) return [...BANK_SOAL_PAKET_3];
+    return [...BANK_SOAL_PAKET_1];
+  }
+
+  mulaiSimulasi() {
+    const nama = document.getElementById('inputNama').value.trim();
+    const kelas = document.getElementById('inputKelas').value.trim();
+    if (!nama) {
+      alert('Mohon isi Nama Lengkap terlebih dahulu.');
+      document.getElementById('inputNama').focus();
+      return;
+    }
+    this.namaUser = nama;
+    this.kelasUser = kelas || '-';
+    this.saveUserToStorage();
+    this.updateTopbar();
+
+    this.mapel = document.getElementById('selectMapel').value;
+    const info = PAKET_INFO[this.paketAktif];
+
+    document.getElementById('konfNama').textContent = this.namaUser;
+    document.getElementById('konfKelas').textContent = this.kelasUser;
+    document.getElementById('konfNamaTes').textContent = this.mapel;
+    document.getElementById('konfPaket').textContent = info.nama;
+    document.getElementById('konfJumlahSoal').textContent = info.jumlah + ' soal';
+    document.getElementById('konfAlokasi').textContent = '60 Menit';
+
+    this.showScreen('screen-konfirmasi');
+  }
+
+  mulaiTes() {
+    const info = PAKET_INFO[this.paketAktif];
+    const bank = this.ambilBankSoal(this.paketAktif);
+    this.soalList = info.acak ? this.acakSoalOpsi(bank) : bank;
+    this.totalSoal = this.soalList.length;
+
+    this.currentIndex = 0;
+    this.jawabanUser = {};
+    this.raguSet.clear();
+    this.sisaWaktu = ALOKASI_WAKTU_DETIK;
+    this.waktuMulai = new Date();
+    this.waktuSelesai = null;
+
+    document.getElementById('chipPaket').textContent = `Paket ${this.paketAktif}`;
+
+    this.showScreen('screen-quiz');
+    this.renderSoal();
+    this.startTimer();
+  }
+
+  startTimer() {
+    clearInterval(this.timerInterval);
+    this.updateTimerText();
+    this.timerInterval = setInterval(() => {
+      this.sisaWaktu--;
+      this.updateTimerText();
+      if (this.sisaWaktu <= 0) {
+        clearInterval(this.timerInterval);
+        alert('Waktu habis!');
+        this.tampilkanHasil();
+      }
+    }, 1000);
+  }
+
+  updateTimerText() {
+    const m = String(Math.floor(this.sisaWaktu / 60)).padStart(2, '0');
+    const s = String(this.sisaWaktu % 60).padStart(2, '0');
+    document.getElementById('timerText').textContent = `${m}:${s}`;
+    const box = document.getElementById('timerBox');
+    if (this.sisaWaktu <= 300) box.classList.add('warning');
+    else box.classList.remove('warning');
+  }
+
+  renderSoal() {
+    const soal = this.soalList[this.currentIndex];
+    const state = this.jawabanUser[soal.id];
+    const isRagu = this.raguSet.has(soal.id);
+
+    document.getElementById('quizNomor').textContent = this.currentIndex + 1;
+    document.getElementById('chipTipe').textContent = soal.tipe;
+
+    const body = document.getElementById('quizBody');
+    body.innerHTML = `
+      <div class="quiz-badges">
+        <span class="badge badge-elemen">${soal.elemen}</span>
+        <span class="badge badge-${soal.level.toLowerCase()}">${soal.level}</span>
+        <span class="badge badge-tipe">${soal.tipe}</span>
+        ${soal.tag ? `<span class="badge ${soal.tag.startsWith('BARU') ? 'badge-baru' : 'badge-asli'}">${soal.tag}</span>` : ''}
+        ${soal.konteks ? `<span class="badge badge-konteks">${soal.konteks}</span>` : ''}
+      </div>
+      <div class="stimulus">${this.renderStimulus(soal.stimulus)}</div>
+      <div class="pertanyaan">${soal.pertanyaan}</div>
+      <div id="jawabanArea">${this.renderJawabanArea(soal, state)}</div>
+    `;
+
+    this.typeset(body);
+
+    body.querySelectorAll('.opsi[data-single="true"]').forEach(btn => {
+      btn.addEventListener('click', () => this.pilihPG(btn.dataset.label));
+    });
+    body.querySelectorAll('.opsi[data-multi="true"]').forEach(btn => {
+      btn.addEventListener('click', () => this.toggleMCMA(btn.dataset.label));
+    });
+    body.querySelectorAll('.bs-row').forEach(row => {
+      const qid = parseInt(row.dataset.qid);
+      row.querySelectorAll('input[type="radio"]').forEach(inp => {
+        inp.addEventListener('change', () => this.pilihBS(qid, inp.value === 'true'));
+      });
+    });
+
+    document.getElementById('btnPrev').disabled = this.currentIndex === 0;
+    document.getElementById('btnNext').textContent =
+      this.currentIndex === this.totalSoal - 1 ? 'Review & Selesai →' : 'Berikutnya →';
+
+    const btnRagu = document.getElementById('btnRagu');
+    btnRagu.textContent = isRagu ? '🟡 Batalkan Ragu-ragu' : '🟡 Ragu-ragu';
+    btnRagu.style.background = isRagu ? '#f59e0b' : 'var(--school-gold)';
+    btnRagu.style.color = isRagu ? 'white' : '#78350f';
+
+    this.updateGrid();
+  }
+
+  renderStimulus(s) {
+    let html = '';
+    if (s.konten) html += `<p>${s.konten}</p>`;
+    if (s.tabel) {
+      html += `
+        <div class="table-wrapper">
+          <table>
+            <thead><tr>${s.tabel.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+            <tbody>${s.tabel.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+          </table>
+        </div>`;
+    }
+    if (s.rumus) html += `<div style="text-align:center; margin:.75rem 0;">${s.rumus}</div>`;
+    if (s.konten2) html += `<p>${s.konten2}</p>`;
+    return html;
+  }
+
+  renderJawabanArea(soal, state) {
+    if (soal.tipe === 'Benar/Salah') {
+      return `
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Pernyataan</th>
+                <th style="width:80px; text-align:center;">Benar</th>
+                <th style="width:80px; text-align:center;">Salah</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${soal.pernyataan.map((p, i) => {
+                const userVal = state?.jawabanBS?.[i];
+                return `
+                <tr class="bs-row" data-qid="${i}">
+                  <td>${p.teks}</td>
+                  <td style="text-align:center;">
+                    <input type="radio" name="bs-${i}" value="true" ${userVal === true ? 'checked' : ''}>
+                  </td>
+                  <td style="text-align:center;">
+                    <input type="radio" name="bs-${i}" value="false" ${userVal === false ? 'checked' : ''}>
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    const jumlahBenar = soal.opsi.filter(o => o.benar).length;
+    const isMCMA = jumlahBenar > 1;
+    const mode = isMCMA ? 'multi' : 'single';
+    const selectedLabels = state ? (state.selected || [state.label].filter(Boolean)) : [];
+
+    return `
+      ${isMCMA ? `<p style="font-size:.85rem; color:var(--muted); margin-bottom:.5rem;">
+        ℹ️ Soal ini memiliki <strong>lebih dari satu jawaban benar</strong>. Pilih semua yang menurut Anda benar.
+      </p>` : ''}
+      <div class="opsi-list">
+        ${soal.opsi.map(o => {
+          const isSelected = selectedLabels.includes(o.label);
+          return `
+            <button class="opsi ${isSelected ? 'terpilih' : ''}"
+              data-label="${o.label}" data-${mode}="true" type="button">
+              <span class="label">${o.label}.</span>
+              <span class="teks">${o.teks}</span>
+              <span class="mark">${isSelected ? '●' : ''}</span>
+            </button>`;
+        }).join('')}
+      </div>`;
+  }
+
+  pilihPG(label) {
+    const soal = this.soalList[this.currentIndex];
+    this.jawabanUser[soal.id] = { label, tipe: 'PG' };
+    this.renderSoal();
+  }
+
+  toggleMCMA(label) {
+    const soal = this.soalList[this.currentIndex];
+    if (!this.jawabanUser[soal.id]) {
+      this.jawabanUser[soal.id] = { selected: [], tipe: 'PG-MCMA' };
+    }
+    const state = this.jawabanUser[soal.id];
+    const idx = state.selected.indexOf(label);
+    if (idx >= 0) state.selected.splice(idx, 1);
+    else state.selected.push(label);
+    if (state.selected.length === 0) delete this.jawabanUser[soal.id];
+    this.renderSoal();
+  }
+
+  pilihBS(qid, nilai) {
+    const soal = this.soalList[this.currentIndex];
+    if (!this.jawabanUser[soal.id]) {
+      this.jawabanUser[soal.id] = { jawabanBS: {}, tipe: 'BS' };
+    }
+    this.jawabanUser[soal.id].jawabanBS[qid] = nilai;
+  }
+
+  typeset(el) {
+    if (!el) return;
+    if (this.typesetTimer) clearTimeout(this.typesetTimer);
+    this.typesetTimer = setTimeout(() => {
+      if (window.MathJax && MathJax.typesetPromise) {
+        if (MathJax.typesetClear) { try { MathJax.typesetClear([el]); } catch (e) {} }
+        MathJax.typesetPromise([el]).catch(err => console.warn('MathJax:', err));
+      }
+    }, 30);
+  }
+
+  prev() { if (this.currentIndex > 0) { this.currentIndex--; this.renderSoal(); } }
+  next() {
+    if (this.currentIndex < this.totalSoal - 1) {
+      this.currentIndex++; this.renderSoal();
+    } else {
+      this.bukaReview();
+    }
+  }
+
+  toggleRagu() {
+    const soal = this.soalList[this.currentIndex];
+    if (this.raguSet.has(soal.id)) this.raguSet.delete(soal.id);
+    else this.raguSet.add(soal.id);
+    this.renderSoal();
+  }
+
+  bukaDrawer() {
+    document.getElementById('drawerDaftarSoal').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    this.updateGrid();
+  }
+  tutupDrawer() {
+    document.getElementById('drawerDaftarSoal').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+  }
+
+  soalTerjawab(s) {
+    const st = this.jawabanUser[s.id];
+    if (!st) return false;
+    if (st.tipe === 'PG') return !!st.label;
+    if (st.tipe === 'PG-MCMA') return st.selected && st.selected.length > 0;
+    if (st.tipe === 'BS') return st.jawabanBS && Object.keys(st.jawabanBS).length === s.pernyataan.length;
+    return false;
+  }
+
+  updateGrid() {
+    const grid = document.getElementById('soalGrid');
+    if (!grid) return;
+    grid.innerHTML = this.soalList.map((s, i) => {
+      let cls = 'soal-cell';
+      if (i === this.currentIndex) cls += ' current';
+      else if (this.raguSet.has(s.id)) cls += ' ragu';
+      else if (this.soalTerjawab(s)) cls += ' terjawab';
+      return `<button class="${cls}" data-idx="${i}" type="button">${i + 1}</button>`;
+    }).join('');
+    grid.querySelectorAll('.soal-cell').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.currentIndex = parseInt(btn.dataset.idx);
+        this.renderSoal();
+        this.tutupDrawer();
+      });
+    });
+  }
+
+  bukaReview() {
+    document.getElementById('modalReview').classList.add('open');
+    this.updateReviewGrid();
+  }
+  tutupReview() {
+    document.getElementById('modalReview').classList.remove('open');
+  }
+
+  updateReviewGrid() {
+    let terjawab = 0, belum = 0;
+    const grid = document.getElementById('reviewGrid');
+    grid.innerHTML = this.soalList.map((s, i) => {
+      const sudah = this.soalTerjawab(s);
+      const isRagu = this.raguSet.has(s.id);
+      let cls = 'review-cell';
+      if (sudah) { cls += ' terjawab'; terjawab++; }
+      else { cls += ' belum'; belum++; }
+      if (isRagu) cls += ' ragu';
+      return `<button class="${cls}" data-idx="${i}" type="button">${i + 1}</button>`;
+    }).join('');
+
+    document.getElementById('rvTerjawab').textContent = terjawab;
+    document.getElementById('rvBelum').textContent = belum;
+    document.getElementById('rvRagu').textContent = this.raguSet.size;
+
+    grid.querySelectorAll('.review-cell').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.currentIndex = parseInt(btn.dataset.idx);
+        this.tutupReview();
+        this.renderSoal();
+      });
+    });
+  }
+
+  selesaikanTes() {
+    const belumDijawab = this.soalList.filter(s => !this.soalTerjawab(s)).length;
+    if (belumDijawab > 0) {
+      const pesan = `Masih ada ${belumDijawab} soal yang belum dijawab.\n\nApakah Anda yakin ingin menyelesaikan tes sekarang?\nSoal yang belum dijawab akan dianggap SALAH.`;
+      if (!confirm(pesan)) return;
+    } else {
+      if (!confirm('Semua soal sudah dijawab.\n\nSelesaikan tes dan lihat hasil?')) return;
+    }
+    this.tutupReview();
+    this.tampilkanHasil();
+  }
+
+  selesaikanDariReview() { this.selesaikanTes(); }
+
+  hitungBenar() {
+    let benar = 0;
+    this.soalList.forEach(s => {
+      const state = this.jawabanUser[s.id];
+      if (!state) return;
+      if (state.tipe === 'PG') {
+        const opsiBenar = s.opsi.find(o => o.benar).label;
+        if (state.label === opsiBenar) benar++;
+      } else if (state.tipe === 'PG-MCMA') {
+        const opsiBenarList = s.opsi.filter(o => o.benar).map(o => o.label);
+        const sel = state.selected || [];
+        if (opsiBenarList.every(l => sel.includes(l)) && sel.every(l => opsiBenarList.includes(l))) benar++;
+      } else if (state.tipe === 'BS') {
+        let semuaBenar = true;
+        s.pernyataan.forEach((p, i) => { if (state.jawabanBS[i] !== p.benar) semuaBenar = false; });
+        if (semuaBenar) benar++;
+      }
+    });
+    return benar;
+  }
+
+  statusPerSoal(s) {
+    const state = this.jawabanUser[s.id];
+    if (!state) return false;
+    if (state.tipe === 'PG') return state.label === s.opsi.find(o => o.benar).label;
+    if (state.tipe === 'PG-MCMA') {
+      const opsiBenarList = s.opsi.filter(o => o.benar).map(o => o.label);
+      const sel = state.selected || [];
+      return opsiBenarList.every(l => sel.includes(l)) && sel.every(l => opsiBenarList.includes(l));
+    }
+    if (state.tipe === 'BS') return s.pernyataan.every((p, i) => state.jawabanBS[i] === p.benar);
+    return false;
+  }
+
+  tampilkanHasil() {
+    clearInterval(this.timerInterval);
+    this.waktuSelesai = new Date();
+
+    const benar = this.hitungBenar();
+    const salah = this.totalSoal - benar;
+    const nilai = Math.round((benar / this.totalSoal) * 100);
+    const durasiDetik = Math.max(0, Math.floor((this.waktuSelesai - this.waktuMulai) / 1000));
+    const sisaDetik = Math.max(0, this.sisaWaktu);
+
+    document.getElementById('skorAkhir').textContent = nilai;
+    document.getElementById('statBenar').textContent = benar;
+    document.getElementById('statSalah').textContent = salah;
+    document.getElementById('statTotal').textContent = this.totalSoal;
+
+    document.getElementById('hasilNama').textContent = this.namaUser || '-';
+    document.getElementById('hasilKelas').textContent = this.kelasUser || '-';
+    document.getElementById('hasilPaket').textContent = PAKET_INFO[this.paketAktif].nama;
+    document.getElementById('hasilMulai').textContent = this.formatJam(this.waktuMulai);
+    document.getElementById('hasilSelesai').textContent = this.formatJam(this.waktuSelesai);
+    document.getElementById('hasilDurasi').textContent = this.formatDurasi(durasiDetik);
+    document.getElementById('hasilSisa').textContent = this.formatDurasi(sisaDetik);
+
+    this.simpanRiwayat({
+      nama: this.namaUser, kelas: this.kelasUser, mapel: this.mapel,
+      paket: this.paketAktif, paketNama: PAKET_INFO[this.paketAktif].nama,
+      skor: nilai, benar, salah, total: this.totalSoal,
+      waktuMulai: this.waktuMulai.toISOString(), waktuSelesai: this.waktuSelesai.toISOString(),
+      durasiDetik, sisaDetik
+    });
+
+    this.showScreen('screen-hasil');
+  }
+
+  simpanRiwayat(data) {
+    try {
+      const riwayat = JSON.parse(localStorage.getItem('tka_riwayat') || '[]');
+      riwayat.unshift(data);
+      if (riwayat.length > 50) riwayat.length = 50;
+      localStorage.setItem('tka_riwayat', JSON.stringify(riwayat));
+    } catch (e) {}
+  }
+
+  tampilkanPembahasanLengkap() {
+    const list = document.getElementById('pembahasanList');
+    document.getElementById('pembahasanSubtitle').textContent =
+      `${this.totalSoal} soal — ${this.namaUser || 'Pengguna'} (${this.kelasUser || '-'}) — ${PAKET_INFO[this.paketAktif].nama}`;
+
+    list.innerHTML = this.soalList.map((soal, i) => {
+      const state = this.jawabanUser[soal.id];
+      const benar = this.statusPerSoal(soal);
+      const statusClass = benar ? 'benar' : 'salah';
+      const statusText = benar ? '✓ Benar' : '✗ Salah';
+
+      let rekapOpsi = '';
+      if (soal.tipe === 'Pilihan Ganda') {
+        const userSelected = state ? (state.selected || [state.label].filter(Boolean)) : [];
+        rekapOpsi = `<div class="pembahasan-opsi-rekap">
+          ${soal.opsi.map(o => {
+            const isKunci = o.benar;
+            const isUser = userSelected.includes(o.label);
+            let cls = '';
+            if (isKunci && isUser) cls = 'benar-dan-user';
+            else if (isKunci) cls = 'kunci';
+            else if (isUser) cls = 'jawaban-user';
+            const tags = [];
+            if (isKunci) tags.push('<span class="tag kunci">Kunci</span>');
+            if (isUser && !isKunci) tags.push('<span class="tag user">Jawaban Anda</span>');
+            if (isUser && isKunci) tags.push('<span class="tag kunci">Jawaban Anda ✓</span>');
+            return `<div class="row ${cls}">
+              <span class="lbl">${o.label}.</span>
+              <span style="flex:1;">${o.teks}</span>
+              ${tags.join(' ')}
+            </div>`;
+          }).join('')}
+        </div>`;
+      } else if (soal.tipe === 'Benar/Salah') {
+        rekapOpsi = `<div class="pembahasan-opsi-rekap">
+          ${soal.pernyataan.map((p, idx) => {
+            const userVal = state?.jawabanBS?.[idx];
+            const isCorrect = userVal === p.benar;
+            const userText = userVal === true ? 'Benar' : userVal === false ? 'Salah' : '—';
+            return `<div class="row ${isCorrect ? 'benar-dan-user' : 'jawaban-user'}">
+              <span class="lbl">${idx + 1}.</span>
+              <span style="flex:1;">${p.teks}</span>
+              <span class="tag ${isCorrect ? 'kunci' : 'user'}">Jawaban Anda: ${userText}</span>
+              <span style="font-size:.8rem; color:var(--muted);">(Kunci: ${p.benar ? 'Benar' : 'Salah'})</span>
+            </div>`;
+          }).join('')}
+        </div>`;
+      }
+
+      return `
+        <div class="pembahasan-item ${statusClass}">
+          <div class="pembahasan-item-header">
+            <div class="pembahasan-nomor">
+              <span style="background:var(--school-primary); color:white; width:28px; height:28px; border-radius:50%; display:inline-grid; place-items:center; font-size:.85rem;">${i + 1}</span>
+              Soal ${i + 1} — ${soal.elemen}
+              ${soal.konteks ? `<span class="badge badge-konteks" style="font-size:.65rem;">${soal.konteks}</span>` : ''}
+            </div>
+            <span class="status-pill ${statusClass}">${statusText}</span>
+          </div>
+          <div class="pembahasan-pertanyaan">${soal.pertanyaan}</div>
+          ${rekapOpsi}
+          <div class="pembahasan-body">
+            <h4>Konsep</h4><p>${soal.pembahasan.konsep}</p>
+            <h4>Langkah Penyelesaian</h4>
+            <ol>${soal.pembahasan.langkah.map(l => `<li>${l}</li>`).join('')}</ol>
+            <h4>Verifikasi</h4><p>${soal.pembahasan.verifikasi}</p>
+            <h4>Kesimpulan</h4><p>${soal.pembahasan.kesimpulan}</p>
+            <div class="jawaban-box">Jawaban: ${soal.pembahasan.jawaban}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    this.showScreen('screen-pembahasan');
+    this.typeset(list);
+  }
+
+  infoSoal() {
+    const soal = this.soalList[this.currentIndex];
+    const jumlahBenar = soal.tipe === 'Benar/Salah' ? soal.pernyataan.length : soal.opsi.filter(o => o.benar).length;
+    const tipeInfo = jumlahBenar > 1 && soal.tipe === 'Pilihan Ganda' ? 'Pilihan Ganda — MCMA (jawaban > 1)' : soal.tipe;
+    alert(`Soal ${this.currentIndex + 1} dari ${this.totalSoal}\n\nPaket: ${PAKET_INFO[this.paketAktif].nama}\nElemen: ${soal.elemen}\nLevel: ${soal.level}\nTipe: ${tipeInfo}\nKonteks: ${soal.konteks || '-'}\nSumber: ${soal.tag || '-'}`);
+  }
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+window.addEventListener('DOMContentLoaded', () => {
+  const startApp = () => {
+    const app = new SimulasiTKA();
+    window.__sim = app;
+
+    document.getElementById('btnMulaiSimulasi').addEventListener('click', () => app.mulaiSimulasi());
+    document.getElementById('btnMulaiTes').addEventListener('click', () => app.mulaiTes());
+    document.getElementById('btnPrev').addEventListener('click', () => app.prev());
+    document.getElementById('btnNext').addEventListener('click', () => app.next());
+    document.getElementById('btnRagu').addEventListener('click', () => app.toggleRagu());
+    document.getElementById('btnReview').addEventListener('click', () => app.bukaReview());
+    document.getElementById('btnSelesai').addEventListener('click', () => app.selesaikanTes());
+    document.getElementById('btnInfoSoal').addEventListener('click', () => app.infoSoal());
+    document.getElementById('btnDaftarSoal').addEventListener('click', () => app.bukaDrawer());
+    document.getElementById('btnTutupDrawer').addEventListener('click', () => app.tutupDrawer());
+    document.getElementById('drawerOverlay').addEventListener('click', () => app.tutupDrawer());
+    document.getElementById('btnUlang').addEventListener('click', () => app.showScreen('screen-menu'));
+    document.getElementById('btnLihatPembahasan').addEventListener('click', () => app.tampilkanPembahasanLengkap());
+    document.getElementById('btnKembaliHasil').addEventListener('click', () => app.showScreen('screen-hasil'));
+    document.getElementById('btnTutupReview').addEventListener('click', () => app.tutupReview());
+    document.getElementById('btnLanjutKerjakan').addEventListener('click', () => app.tutupReview());
+    document.getElementById('btnSelesaiDariReview').addEventListener('click', () => app.selesaikanDariReview());
+    document.getElementById('modalReview').addEventListener('click', (e) => {
+      if (e.target.id === 'modalReview') app.tutupReview();
+    });
+
+    document.getElementById('inputNama').addEventListener('input', (e) => {
+      app.namaUser = e.target.value.trim();
+      app.updateTopbar();
+    });
+    document.getElementById('inputKelas').addEventListener('input', (e) => {
+      app.kelasUser = e.target.value.trim();
+    });
+  };
+
+  if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+    MathJax.startup.promise.then(startApp).catch(startApp);
+  } else {
+    setTimeout(startApp, 300);
+  }
+});
+</script>
+</body>
+</html>
